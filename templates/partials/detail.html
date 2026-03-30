@@ -1,0 +1,45 @@
+{{define "detail"}}
+<div class="detail-view">
+    <hr class="divider">
+    <p><strong>Report from {{.Organization}} for {{.Domain}}</strong></p>
+    <p style="color: #8b949e;">{{.StartDate}} to {{.EndDate}}</p>
+    <p><strong>Policies: adkim={{.Adkim}}, aspf={{.Aspf}}, p={{.P}}, sp={{.Sp}}, pct={{.Pct}}</strong></p>
+
+    <table class="detail-table" style="margin-top: 0.75rem;">
+        <thead>
+            <tr>
+                <th title="The source IP address of the email sender originating the message">IP</th>
+                <th title="The reverse DNS resolved hostname of the IP address">Host Name</th>
+                <th title="The sum of messages sent from this IP">Message Count</th>
+                <th title="The DMARC policy action applied by the receiver: none (pass), quarantine, or reject">Disposition</th>
+                <th title="Policy override reasons applied by the receiver">Reason</th>
+                <th title="The explicit domain securely embedded in the DKIM cryptographic signature header">DKIM Domain</th>
+                <th title="The raw result of validating the DKIM cryptographic signature">DKIM Auth</th>
+                <th title="The envelope-from (Return-Path) domain evaluated for SPF routing checks">SPF Domain</th>
+                <th title="The raw result of the SPF validation querying DNS for permitted ranges">SPF Auth</th>
+                <th title="Alignment: Did the passing DKIM Domain properly match the 'From' header domain?">DKIM Align</th>
+                <th title="Alignment: Did the passing SPF Domain properly match the 'From' header domain?">SPF Align</th>
+                <th title="Derived Overall DMARC Pass/Fail">DMARC</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Records}}
+            <tr>
+                <td>{{.SourceIP}}</td>
+                <td>{{.HostName}}</td>
+                <td>{{.Count}}</td>
+                <td>{{.Disposition}}</td>
+                <td>{{.Reason}}</td>
+                <td>{{.DKIMDomain}}</td>
+                <td>{{.DKIMAuth}}</td>
+                <td>{{.SPFDomain}}</td>
+                <td>{{.SPFAuth}}</td>
+                <td>{{.DKIMAlign}}</td>
+                <td>{{.SPFAlign}}</td>
+                <td>{{.DMARC}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}

@@ -1,0 +1,82 @@
+{{define "domainsList"}}
+<div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 class="page-title">Manage Domains</h2>
+        <a href="/domains/new" class="btn btn-primary">+ Add Domain</a>
+    </div>
+
+    {{if .Message}}
+    <div class="flash-message flash-success">{{.Message}}</div>
+    {{end}}
+
+    {{if .Domains}}
+    <table>
+        <thead>
+            <tr>
+                <th>Domain</th>
+                <th>IMAP Server</th>
+                <th>User</th>
+                <th>Folder</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Domains}}
+            <tr>
+                <td><strong>{{.Name}}</strong></td>
+                <td>{{.IMAPServer}}</td>
+                <td>{{.IMAPUser}}</td>
+                <td>{{.IMAPFolder}}</td>
+                <td>
+                    <form method="POST" action="/domains/{{.ID}}/toggle" style="display:inline;">
+                        <button type="submit" class="toggle-btn {{if .Enabled}}toggle-on{{else}}toggle-off{{end}}">
+                            {{if .Enabled}}Enabled{{else}}Disabled{{end}}
+                        </button>
+                    </form>
+                </td>
+                <td>{{.CreatedAt}}</td>
+                <td>
+                    <a href="/domains/{{.ID}}/edit" class="btn btn-sm btn-secondary">Edit</a>
+                    <form method="POST" action="/domains/{{.ID}}/delete" style="display:inline;"
+                          onsubmit="return confirm('Delete domain {{.Name}}? Reports will be preserved.');">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+    {{else}}
+    <p class="info-message">No domains configured yet. Click "Add Domain" to set up your first IMAP mailbox.</p>
+    {{end}}
+</div>
+{{end}}
+
+{{define "domainsLayout"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manage Domains - Inkwell</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <h3>Navigation</h3>
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-link">Dashboard</a>
+                <a href="/domains" class="nav-link active">Manage Domains</a>
+            </nav>
+        </aside>
+        <div class="main-content">
+            {{template "domainsList" .}}
+        </div>
+    </div>
+</body>
+</html>
+{{end}}

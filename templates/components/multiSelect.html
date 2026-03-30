@@ -1,0 +1,34 @@
+{{define "multiSelect"}}
+<div class="multi-select-wrapper" x-data="multiSelect()">
+    <label class="select-all-label">
+        <input type="checkbox"
+               x-model="selectAll"
+               @change="toggleAll()">
+        Select All
+    </label>
+    <button type="button"
+            class="dropdown-toggle"
+            @click="open = !open">
+        <span x-text="selectedCount() + ' / ' + items.length + ' selected'"></span>
+        <span x-text="open ? '▲' : '▼'" style="font-size:0.7rem"></span>
+    </button>
+    <div class="dropdown-menu"
+         x-show="open"
+         @click.outside="open = false"
+         x-cloak>
+        <template x-for="item in items" :key="item">
+            <label>
+                <input type="checkbox"
+                       :value="item"
+                       x-model="selected"
+                       @change="onItemChange()">
+                <span x-text="item"></span>
+            </label>
+        </template>
+    </div>
+    <!-- Hidden inputs for form submission -->
+    <template x-for="s in selected" :key="'h_' + s">
+        <input type="hidden" :name="fieldName" :value="s">
+    </template>
+</div>
+{{end}}

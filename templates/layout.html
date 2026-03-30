@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inkwell Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            {{template "sidebar" .Sidebar}}
+        </aside>
+        <div class="main-content" id="main-content">
+            {{template "content" .}}
+        </div>
+    </div>
+</body>
+</html>

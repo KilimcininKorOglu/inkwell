@@ -1,0 +1,102 @@
+{{define "domainForm"}}
+<div>
+    <h2 class="page-title">{{if .IsEdit}}Edit Domain{{else}}Add Domain{{end}}</h2>
+
+    {{if .Error}}
+    <div class="flash-message flash-error">{{.Error}}</div>
+    {{end}}
+
+    <form method="POST" action="{{if .IsEdit}}/domains/{{.Domain.ID}}{{else}}/domains{{end}}" class="domain-form">
+
+        <div class="form-group">
+            <label class="form-label" for="name">Domain Name</label>
+            <input class="form-input" type="text" id="name" name="name"
+                   value="{{.Domain.Name}}" placeholder="example.com" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group form-grow">
+                <label class="form-label" for="imap_server">IMAP Server</label>
+                <input class="form-input" type="text" id="imap_server" name="imap_server"
+                       value="{{.Domain.IMAPServer}}" placeholder="imap.example.com" required>
+            </div>
+            <div class="form-group" style="width: 120px;">
+                <label class="form-label" for="imap_port">Port</label>
+                <input class="form-input" type="number" id="imap_port" name="imap_port"
+                       value="{{.Domain.IMAPPort}}" placeholder="993" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group form-grow">
+                <label class="form-label" for="imap_user">IMAP User</label>
+                <input class="form-input" type="text" id="imap_user" name="imap_user"
+                       value="{{.Domain.IMAPUser}}" placeholder="dmarc@example.com" required>
+            </div>
+            <div class="form-group form-grow">
+                <label class="form-label" for="imap_password">IMAP Password</label>
+                <input class="form-input" type="password" id="imap_password" name="imap_password"
+                       value="" placeholder="{{if .IsEdit}}Leave blank to keep existing{{else}}Enter password{{end}}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="imap_folder">IMAP Folder</label>
+            <input class="form-input" type="text" id="imap_folder" name="imap_folder"
+                   value="{{.Domain.IMAPFolder}}" placeholder="INBOX">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group form-grow">
+                <label class="form-label" for="imap_move_folder">Move Folder (Success)</label>
+                <input class="form-input" type="text" id="imap_move_folder" name="imap_move_folder"
+                       value="{{.Domain.IMAPMoveFolder}}" placeholder="processed">
+            </div>
+            <div class="form-group form-grow">
+                <label class="form-label" for="imap_move_folder_err">Move Folder (Error)</label>
+                <input class="form-input" type="text" id="imap_move_folder_err" name="imap_move_folder_err"
+                       value="{{.Domain.IMAPMoveFolderErr}}" placeholder="error">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label form-checkbox">
+                <input type="checkbox" name="enabled" {{if .Domain.Enabled}}checked{{end}}>
+                Enable IMAP polling for this domain
+            </label>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{if .IsEdit}}Update Domain{{else}}Create Domain{{end}}</button>
+            <a href="/domains" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{{end}}
+
+{{define "domainFormLayout"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{if .IsEdit}}Edit{{else}}Add{{end}} Domain - Inkwell</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <h3>Navigation</h3>
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-link">Dashboard</a>
+                <a href="/domains" class="nav-link active">Manage Domains</a>
+            </nav>
+        </aside>
+        <div class="main-content">
+            {{template "domainForm" .}}
+        </div>
+    </div>
+</body>
+</html>
+{{end}}

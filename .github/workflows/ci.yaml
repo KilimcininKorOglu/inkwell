@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.14.1
+
+      - name: Lint
+        run: make lint
+
+      - name: Build all platforms
+        run: make build-all
+
+      - name: Verify binaries
+        run: |
+          echo "=== Linux amd64 ==="
+          ls -la bin/inkwell_linux_amd64
+          echo "=== Linux arm64 ==="
+          ls -la bin/inkwell_linux_arm64
+          echo "=== Windows amd64 ==="
+          ls -la bin/inkwell_windows_amd64.exe
+          echo "=== Darwin amd64 ==="
+          ls -la bin/inkwell_darwin_amd64
+          echo "=== Darwin arm64 ==="
+          ls -la bin/inkwell_darwin_arm64

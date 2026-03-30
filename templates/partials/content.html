@@ -1,0 +1,16 @@
+{{define "content"}}
+{{if not .HasData}}
+    {{template "empty" .}}
+{{else if not .Metrics}}
+    <h2 class="page-title">🛡️ Inkwell</h2>
+    <p class="warning-message">Please select at least one Domain and one Organization from the sidebar to view data.</p>
+{{else}}
+    <h2 class="page-title">🛡️ Inkwell</h2>
+    {{template "metrics" .Metrics}}
+    {{if .ChartData}}
+        {{template "chart" .ChartData}}
+    {{end}}
+    <hr class="divider">
+    {{template "reportsTable" .}}
+{{end}}
+{{end}}
