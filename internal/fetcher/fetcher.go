@@ -17,6 +17,9 @@ import (
 	"github.com/emersion/go-message/mail"
 )
 
+// maxDecompressSize limits decompressed attachment size to prevent zip bomb DoS (100MB).
+const maxDecompressSize = 100 * 1024 * 1024
+
 // FetchDMARCReports connects to IMAP for a specific domain, finds unread emails, extracts XML reports.
 // The domain.IMAPPassword must already be decrypted before calling this function.
 func FetchDMARCReports(domain *models.Domain) ([]string, error) {
@@ -193,7 +196,7 @@ func extractXMLFromMessage(msg *imapclient.FetchMessageData) ([]string, error) {
 			continue
 		}
 
-		payload, err := io.ReadAll(part.Body)
+		payload, err := io.ReadAll(io.LimitReader(part.Body, maxDecompressSize))
 		if err != nil {
 			log.Printf("Error reading attachment %s: %v", filename, err)
 			continue
@@ -230,7 +233,7 @@ func extractXMLFromPayload(filename string, payload []byte) ([]string, error) {
 				log.Printf("Error opening zip entry %s: %v", f.Name, err)
 				continue
 			}
-			data, err := io.ReadAll(rc)
+			data, err := io.ReadAll(io.LimitReader(rc, maxDecompressSize))
 			rc.Close()
 			if err != nil {
 				log.Printf("Error reading zip entry %s: %v", f.Name, err)
@@ -246,7 +249,7 @@ func extractXMLFromPayload(filename string, payload []byte) ([]string, error) {
 		if err != nil {
 			return nil, fmt.Errorf("gzip open error: %w", err)
 		}
-		data, err := io.ReadAll(gr)
+		data, err := io.ReadAll(io.LimitReader(gr, maxDecompressSize))
 		gr.Close()
 		if err != nil {
 			return nil, fmt.Errorf("gzip read error: %w", err)
