@@ -94,6 +94,14 @@ func FetchGlobalMetrics(db *gorm.DB, startDate, endDate time.Time, domains, orgs
 	}, nil
 }
 
+// escapeLike escapes SQL LIKE metacharacters so they are treated as literals.
+func escapeLike(s string) string {
+	s = strings.ReplaceAll(s, "\\", "\\\\")
+	s = strings.ReplaceAll(s, "%", "\\%")
+	s = strings.ReplaceAll(s, "_", "\\_")
+	return s
+}
+
 // FetchReportsList returns the master report list, optionally filtered by search query.
 func FetchReportsList(db *gorm.DB, startDate, endDate time.Time, domains, orgs []string, searchQuery string) ([]ReportRow, error) {
 	endDateInclusive := endDate.AddDate(0, 0, 1)
@@ -133,7 +141,7 @@ func FetchReportsList(db *gorm.DB, startDate, endDate time.Time, domains, orgs [
 		Where("reports.begin_date >= ? AND reports.begin_date <= ?", startDate, endDateInclusive)
 
 	if searchQuery != "" {
-		like := "%" + searchQuery + "%"
+		like := "%" + escapeLike(searchQuery) + "%"
 		query = query.Where("(reports.domain LIKE ? OR reports.org_name LIKE ? OR reports.report_id LIKE ? OR records.source_ip LIKE ? OR records.host_name LIKE ?)",
 			like, like, like, like, like)
 	}
