@@ -81,50 +81,21 @@
 {{define "domainsLayout"}}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Domains - Inkwell</title>
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    {{template "shellHead"}}
 </head>
-
 <body>
     <header class="gmail-topbar">
-        <div class="topbar-left">
-            <div class="topbar-logo">
-                <span class="logo-icon">🛡️</span>
-                <span class="logo-text">Inkwell</span>
-            </div>
-        </div>
+        {{template "shellTopbarLogo"}}
         <div class="topbar-right"></div>
     </header>
     <div class="app-layout">
-        <aside class="sidebar">
-            <nav class="sidebar-nav-main">
-                <a href="/" class="nav-item">
-                    <span class="material-icons-outlined">inbox</span>
-                    <span>Reports</span>
-                </a>
-                <a href="/domains" class="nav-item active">
-                    <span class="material-icons-outlined">dns</span>
-                    <span>Domains</span>
-                </a>
-            </nav>
-        </aside>
+        {{template "shellDomainsSidebar"}}
         <div class="main-content">
             {{template "domainsList" .}}
         </div>
     </div>
 </body>
-
 </html>
 {{end}}

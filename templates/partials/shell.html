@@ -1,0 +1,34 @@
+{{define "shellHead"}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+{{end}}
+
+{{define "shellTopbarLogo"}}
+<div class="topbar-left">
+    <div class="topbar-logo">
+        <span class="logo-icon">🛡️</span>
+        <span class="logo-text">Inkwell</span>
+    </div>
+</div>
+{{end}}
+
+{{define "shellDomainsSidebar"}}
+<aside class="sidebar">
+    <nav class="sidebar-nav-main">
+        <a href="/" class="nav-item">
+            <span class="material-icons-outlined">inbox</span>
+            <span>Reports</span>
+        </a>
+        <a href="/domains" class="nav-item active">
+            <span class="material-icons-outlined">dns</span>
+            <span>Domains</span>
+        </a>
+    </nav>
+</aside>
+{{end}}
