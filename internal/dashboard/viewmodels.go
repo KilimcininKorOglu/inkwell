@@ -81,8 +81,9 @@ type DetailRecord struct {
 
 // DomainsPageData is the top-level struct for the /domains page.
 type DomainsPageData struct {
-	Domains []DomainRow
-	Message string
+	Domains   []DomainRow
+	Message   string
+	CSRFToken string
 }
 
 // DomainRow is one row in the domains list table.
@@ -98,9 +99,10 @@ type DomainRow struct {
 
 // DomainFormData is passed to the domain add/edit form template.
 type DomainFormData struct {
-	Domain DomainFormValues
-	IsEdit bool
-	Error  string
+	Domain    DomainFormValues
+	IsEdit    bool
+	Error     string
+	CSRFToken string
 }
 
 // DomainFormValues holds the form field values for a domain.

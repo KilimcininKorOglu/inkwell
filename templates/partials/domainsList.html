@@ -40,6 +40,7 @@
                 <td style="color: var(--text-tertiary);">{{.IMAPFolder}}</td>
                 <td>
                     <form method="POST" action="/domains/{{.ID}}/toggle" style="display:inline;">
+                        <input type="hidden" name="_csrf" value="{{$.CSRFToken}}">
                         <button type="submit" class="toggle-btn {{if .Enabled}}toggle-on{{else}}toggle-off{{end}}">
                             {{if .Enabled}}Enabled{{else}}Disabled{{end}}
                         </button>
@@ -53,6 +54,7 @@
                     </a>
                     <form method="POST" action="/domains/{{.ID}}/delete" style="display:inline;"
                         onsubmit="return confirm('Delete domain {{.Name}}? Reports will be preserved.');">
+                        <input type="hidden" name="_csrf" value="{{$.CSRFToken}}">
                         <button type="submit" class="btn btn-sm btn-danger">
                             <span class="material-icons-outlined" style="font-size: 0.85rem;">delete</span>
                             Delete

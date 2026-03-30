@@ -1,8 +1,10 @@
 package dashboard
 
 import (
+	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"log"
@@ -10,6 +12,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/KilimcininKorOglu/inkwell/internal/crypto"
@@ -25,11 +28,17 @@ var flashMessages = map[string]string{
 	"deleted": "Domain deleted successfully",
 }
 
+type csrfEntry struct {
+	token   string
+	created time.Time
+}
+
 // Handler holds dependencies for HTTP handlers.
 type Handler struct {
 	db            *gorm.DB
 	tmpl          *template.Template
 	encryptionKey string
+	csrfTokens    sync.Map
 }
 
 // NewRouter creates the Chi router with all dashboard routes.
@@ -134,8 +143,9 @@ func (h *Handler) handleDomainsList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := DomainsPageData{
-		Domains: domains,
-		Message: flashMessages[r.URL.Query().Get("msg")],
+		Domains:   domains,
+		Message:   flashMessages[r.URL.Query().Get("msg")],
+		CSRFToken: h.generateCSRFToken(),
 	}
 
 	if isHTMX(r) {
@@ -152,7 +162,8 @@ func (h *Handler) handleDomainNew(w http.ResponseWriter, r *http.Request) {
 			IMAPFolder: "INBOX",
 			Enabled:    true,
 		},
-		IsEdit: false,
+		IsEdit:    false,
+		CSRFToken: h.generateCSRFToken(),
 	}
 
 	if isHTMX(r) {
@@ -165,6 +176,10 @@ func (h *Handler) handleDomainNew(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleDomainCreate(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+	if !h.validateCSRFToken(r) {
+		http.Error(w, "Invalid or expired form token", http.StatusForbidden)
 		return
 	}
 
@@ -236,7 +251,8 @@ func (h *Handler) handleDomainEdit(w http.ResponseWriter, r *http.Request) {
 			IMAPMoveFolderErr: domain.IMAPMoveFolderErr,
 			Enabled:           domain.Enabled,
 		},
-		IsEdit: true,
+		IsEdit:    true,
+		CSRFToken: h.generateCSRFToken(),
 	}
 
 	if isHTMX(r) {
@@ -255,6 +271,10 @@ func (h *Handler) handleDomainUpdate(w http.ResponseWriter, r *http.Request) {
 
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+	if !h.validateCSRFToken(r) {
+		http.Error(w, "Invalid or expired form token", http.StatusForbidden)
 		return
 	}
 
@@ -306,6 +326,15 @@ func (h *Handler) handleDomainUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleDomainDelete(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+	if !h.validateCSRFToken(r) {
+		http.Error(w, "Invalid or expired form token", http.StatusForbidden)
+		return
+	}
+
 	id, err := parseID(r)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
@@ -327,6 +356,15 @@ func (h *Handler) handleDomainDelete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleDomainToggle(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+	if !h.validateCSRFToken(r) {
+		http.Error(w, "Invalid or expired form token", http.StatusForbidden)
+		return
+	}
+
 	id, err := parseID(r)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
@@ -360,8 +398,9 @@ func (h *Handler) renderDomainFormError(w http.ResponseWriter, r *http.Request, 
 			IMAPMoveFolderErr: r.FormValue("imap_move_folder_err"),
 			Enabled:           r.FormValue("enabled") == "on",
 		},
-		IsEdit: isEdit,
-		Error:  errMsg,
+		IsEdit:    isEdit,
+		Error:     errMsg,
+		CSRFToken: h.generateCSRFToken(),
 	}
 
 	if isHTMX(r) {
@@ -488,6 +527,29 @@ func (h *Handler) render(w http.ResponseWriter, name string, data interface{}) {
 		log.Printf("Template error: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
+}
+
+func (h *Handler) generateCSRFToken() string {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		log.Printf("Error generating CSRF token: %v", err)
+		return ""
+	}
+	token := hex.EncodeToString(b)
+	h.csrfTokens.Store(token, csrfEntry{token: token, created: time.Now()})
+	return token
+}
+
+func (h *Handler) validateCSRFToken(r *http.Request) bool {
+	token := r.FormValue("_csrf")
+	if token == "" {
+		return false
+	}
+	if val, ok := h.csrfTokens.LoadAndDelete(token); ok {
+		entry := val.(csrfEntry)
+		return time.Since(entry.created) < 1*time.Hour
+	}
+	return false
 }
 
 func isHTMX(r *http.Request) bool {
