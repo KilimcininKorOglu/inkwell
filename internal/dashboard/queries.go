@@ -12,10 +12,12 @@ import (
 )
 
 // HasAnyData checks if any reports exist.
-func HasAnyData(db *gorm.DB) bool {
+func HasAnyData(db *gorm.DB) (bool, error) {
 	var count int64
-	db.Model(&models.Report{}).Count(&count)
-	return count > 0
+	if err := db.Model(&models.Report{}).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }
 
 // FilterOptions holds the available filter values from the database.

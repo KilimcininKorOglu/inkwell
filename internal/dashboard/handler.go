@@ -353,7 +353,10 @@ func (h *Handler) renderDomainFormError(w http.ResponseWriter, r *http.Request, 
 }
 
 func (h *Handler) buildPageData(r *http.Request) *PageData {
-	hasData := HasAnyData(h.db)
+	hasData, err := HasAnyData(h.db)
+	if err != nil {
+		log.Printf("Error checking data: %v", err)
+	}
 
 	opts, _ := FetchFilterOptions(h.db)
 
