@@ -40,6 +40,7 @@ func main() {
 	log.Println("Waiting for database connection...")
 	var db *gorm.DB
 	var err error
+	connected := false
 	for i := 0; i < 30; i++ {
 		db, err = gorm.Open(mysql.Open(cfg.DSN()), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
@@ -47,14 +48,15 @@ func main() {
 		if err == nil {
 			sqlDB, _ := db.DB()
 			if pingErr := sqlDB.Ping(); pingErr == nil {
+				connected = true
 				break
 			}
 		}
 		log.Printf("Waiting for database... attempt %d/30", i+1)
 		time.Sleep(2 * time.Second)
 	}
-	if err != nil {
-		log.Fatalf("Failed to connect to database after 30 attempts: %v", err)
+	if !connected {
+		log.Fatalf("Failed to connect to database after 30 attempts")
 	}
 	log.Println("Database connected successfully.")
 
