@@ -36,7 +36,7 @@ archives:
           - zip
     files:
       - README.md
-      - .env
+      - .env.example
 
 checksum:
   name_template: 'checksums.txt'
