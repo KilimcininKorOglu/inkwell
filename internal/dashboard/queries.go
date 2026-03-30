@@ -278,6 +278,8 @@ func FetchReportDetail(db *gorm.DB, reportDBID uint) (*ReportDetailData, error) 
 		dmarc := "fail"
 		if disposition == "none" {
 			dmarc = "pass"
+		} else if disposition == "" {
+			dmarc = "unknown"
 		}
 
 		// Auth result aggregation (join with comma)
