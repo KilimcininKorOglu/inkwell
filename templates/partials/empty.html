@@ -1,9 +1,18 @@
 {{define "empty"}}
-<div>
-    <h2 class="page-title">🛡️ Inkwell</h2>
-    <p class="info-message">
-        No DMARC reports found yet. The fetcher daemon might still be processing,
-        or your configured IMAP inbox hasn't received any new valid Aggregate XML attachments.
+<div
+    style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; text-align: center;">
+    <span class="material-icons-outlined"
+        style="font-size: 4rem; color: var(--text-tertiary); margin-bottom: 1rem;">mail_outline</span>
+    <h2
+        style="font-family: 'Google Sans', sans-serif; font-weight: 400; font-size: 1.3rem; color: var(--text-primary); margin-bottom: 0.5rem;">
+        No DMARC reports yet</h2>
+    <p style="color: var(--text-secondary); font-size: 0.88rem; max-width: 420px;">
+        The fetcher daemon is waiting for new reports. Make sure you have at least one domain configured with valid IMAP
+        credentials.
     </p>
+    <a href="/domains" class="btn btn-primary" style="margin-top: 1.5rem;">
+        <span class="material-icons-outlined" style="font-size: 1rem;">add</span>
+        Add Domain
+    </a>
 </div>
 {{end}}

@@ -1,24 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Inkwell Dashboard</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <title>Inkwell</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <link rel="stylesheet" href="/static/css/style.css">
-    <style>[x-cloak] { display: none !important; }</style>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 </head>
+
 <body>
+    <!-- Gmail Top Bar -->
+    <header class="gmail-topbar">
+        <div class="topbar-left">
+            <span class="material-icons-outlined topbar-menu-icon">menu</span>
+            <div class="topbar-logo">
+                <span class="logo-icon">🛡️</span>
+                <span class="logo-text">Inkwell</span>
+            </div>
+        </div>
+        <div class="topbar-search">
+            <span class="material-icons-outlined search-icon">search</span>
+            <span class="search-placeholder">Search reports</span>
+        </div>
+        <div class="topbar-right">
+            <span class="material-icons-outlined topbar-action">help_outline</span>
+            <span class="material-icons-outlined topbar-action">settings</span>
+            <div class="topbar-avatar">I</div>
+        </div>
+    </header>
+
     <div class="app-layout">
+        <!-- Gmail Sidebar -->
         <aside class="sidebar">
-            {{template "sidebar" .Sidebar}}
+            <nav class="sidebar-nav-main">
+                <a href="/" class="nav-item active">
+                    <span class="material-icons-outlined">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/domains" class="nav-item">
+                    <span class="material-icons-outlined">dns</span>
+                    <span>Domains</span>
+                </a>
+            </nav>
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-filters">
+                {{template "sidebar" .Sidebar}}
+            </div>
         </aside>
+
+        <!-- Main Content -->
         <div class="main-content" id="main-content">
             {{template "content" .}}
         </div>
     </div>
 </body>
+
 </html>

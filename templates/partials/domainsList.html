@@ -1,12 +1,21 @@
 {{define "domainsList"}}
 <div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h2 class="page-title">Manage Domains</h2>
-        <a href="/domains/new" class="btn btn-primary">+ Add Domain</a>
+        <h2 class="page-title">
+            <span class="material-icons-outlined" style="color: var(--accent-blue);">dns</span>
+            Domains
+        </h2>
+        <a href="/domains/new" class="btn btn-primary">
+            <span class="material-icons-outlined" style="font-size: 1rem;">add</span>
+            Add Domain
+        </a>
     </div>
 
     {{if .Message}}
-    <div class="flash-message flash-success">{{.Message}}</div>
+    <div class="flash-message flash-success">
+        <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: -3px;">check_circle</span>
+        {{.Message}}
+    </div>
     {{end}}
 
     {{if .Domains}}
@@ -26,9 +35,9 @@
             {{range .Domains}}
             <tr>
                 <td><strong>{{.Name}}</strong></td>
-                <td>{{.IMAPServer}}</td>
-                <td>{{.IMAPUser}}</td>
-                <td>{{.IMAPFolder}}</td>
+                <td style="color: var(--text-secondary);">{{.IMAPServer}}</td>
+                <td style="color: var(--text-secondary);">{{.IMAPUser}}</td>
+                <td style="color: var(--text-tertiary);">{{.IMAPFolder}}</td>
                 <td>
                     <form method="POST" action="/domains/{{.ID}}/toggle" style="display:inline;">
                         <button type="submit" class="toggle-btn {{if .Enabled}}toggle-on{{else}}toggle-off{{end}}">
@@ -36,12 +45,18 @@
                         </button>
                     </form>
                 </td>
-                <td>{{.CreatedAt}}</td>
+                <td style="color: var(--text-tertiary); font-size: 0.78rem;">{{.CreatedAt}}</td>
                 <td>
-                    <a href="/domains/{{.ID}}/edit" class="btn btn-sm btn-secondary">Edit</a>
+                    <a href="/domains/{{.ID}}/edit" class="btn btn-sm btn-secondary">
+                        <span class="material-icons-outlined" style="font-size: 0.85rem;">edit</span>
+                        Edit
+                    </a>
                     <form method="POST" action="/domains/{{.ID}}/delete" style="display:inline;"
-                          onsubmit="return confirm('Delete domain {{.Name}}? Reports will be preserved.');">
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        onsubmit="return confirm('Delete domain {{.Name}}? Reports will be preserved.');">
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            <span class="material-icons-outlined" style="font-size: 0.85rem;">delete</span>
+                            Delete
+                        </button>
                     </form>
                 </td>
             </tr>
@@ -49,7 +64,16 @@
         </tbody>
     </table>
     {{else}}
-    <p class="info-message">No domains configured yet. Click "Add Domain" to set up your first IMAP mailbox.</p>
+    <div
+        style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 2rem; text-align: center;">
+        <span class="material-icons-outlined"
+            style="font-size: 3.5rem; color: var(--text-tertiary); margin-bottom: 1rem;">dns</span>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">No domains configured yet.</p>
+        <a href="/domains/new" class="btn btn-primary">
+            <span class="material-icons-outlined" style="font-size: 1rem;">add</span>
+            Add your first domain
+        </a>
+    </div>
     {{end}}
 </div>
 {{end}}
@@ -57,20 +81,51 @@
 {{define "domainsLayout"}}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Manage Domains - Inkwell</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <title>Domains - Inkwell</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
+    <header class="gmail-topbar">
+        <div class="topbar-left">
+            <span class="material-icons-outlined topbar-menu-icon">menu</span>
+            <div class="topbar-logo">
+                <span class="logo-icon">🛡️</span>
+                <span class="logo-text">Inkwell</span>
+            </div>
+        </div>
+        <div class="topbar-search">
+            <span class="material-icons-outlined search-icon">search</span>
+            <span class="search-placeholder">Search domains</span>
+        </div>
+        <div class="topbar-right">
+            <span class="material-icons-outlined topbar-action">settings</span>
+            <div class="topbar-avatar">I</div>
+        </div>
+    </header>
     <div class="app-layout">
         <aside class="sidebar">
-            <h3>Navigation</h3>
-            <nav class="sidebar-nav">
-                <a href="/" class="nav-link">Dashboard</a>
-                <a href="/domains" class="nav-link active">Manage Domains</a>
+            <nav class="sidebar-nav-main">
+                <a href="/" class="nav-item">
+                    <span class="material-icons-outlined">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/domains" class="nav-item active">
+                    <span class="material-icons-outlined">dns</span>
+                    <span>Domains</span>
+                </a>
             </nav>
         </aside>
         <div class="main-content">
@@ -78,5 +133,6 @@
         </div>
     </div>
 </body>
+
 </html>
 {{end}}

@@ -1,15 +1,27 @@
 {{define "metrics"}}
 <div class="metrics-row">
     <div class="metric-card">
-        <span class="metric-label">Total IPs Evaluated</span>
+        <span class="metric-label">
+            <span class="material-icons-outlined"
+                style="font-size: 0.85rem; vertical-align: -2px; color: var(--accent-blue);">language</span>
+            Total IPs Evaluated
+        </span>
         <span class="metric-value">{{.TotalIPs}}</span>
     </div>
     <div class="metric-card">
-        <span class="metric-label">Total Email Message Volume</span>
+        <span class="metric-label">
+            <span class="material-icons-outlined"
+                style="font-size: 0.85rem; vertical-align: -2px; color: var(--accent-purple);">mail</span>
+            Total Email Volume
+        </span>
         <span class="metric-value">{{.TotalVolume}}</span>
     </div>
     <div class="metric-card">
-        <span class="metric-label">Overall Authenticated Pass Rate</span>
+        <span class="metric-label">
+            <span class="material-icons-outlined"
+                style="font-size: 0.85rem; vertical-align: -2px; color: var(--accent-green);">verified_user</span>
+            Auth Pass Rate
+        </span>
         <span class="metric-value">{{.PassRateStr}}</span>
     </div>
 </div>

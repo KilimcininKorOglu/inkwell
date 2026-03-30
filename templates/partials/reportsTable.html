@@ -1,8 +1,12 @@
 {{define "reportsTable"}}
 <div>
-    <h3>Available DMARC Reports</h3>
-    <p style="color: #8b949e; font-size: 0.9rem; margin-bottom: 0.75rem;">
-        Select an individual report row from below to instantly expand the deep IP-level processing inspection array exactly like the legacy PHP application!
+    <h3
+        style="font-family: 'Google Sans', sans-serif; font-size: 0.95rem; font-weight: 500; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+        <span class="material-icons-outlined" style="font-size: 1rem; color: var(--text-secondary);">description</span>
+        Reports
+    </h3>
+    <p style="color: var(--text-tertiary); font-size: 0.8rem; margin-bottom: 0.75rem;">
+        Click a row to inspect IP-level authentication details.
     </p>
     <table>
         <thead>
@@ -10,7 +14,7 @@
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>Domain</th>
-                <th>Reporting Organization</th>
+                <th>Organization</th>
                 <th>Report ID</th>
                 <th>Messages</th>
             </tr>
@@ -18,16 +22,14 @@
         <tbody>
             {{range .Reports}}
             <tr class="clickable-row {{if and $.SelectedReport (eq $.SelectedReport.DBID .DBID)}}selected{{end}}"
-                hx-get="/dashboard/detail/{{.DBID}}"
-                hx-target="#detail-panel"
-                hx-swap="innerHTML"
+                hx-get="/dashboard/detail/{{.DBID}}" hx-target="#detail-panel" hx-swap="innerHTML"
                 onclick="document.querySelectorAll('.clickable-row').forEach(r => r.classList.remove('selected')); this.classList.add('selected');">
                 <td>{{.StartDate}}</td>
                 <td>{{.EndDate}}</td>
-                <td>{{.Domain}}</td>
+                <td><strong>{{.Domain}}</strong></td>
                 <td>{{.Organization}}</td>
-                <td>{{.ReportID}}</td>
-                <td>{{.Messages}}</td>
+                <td style="color: var(--text-secondary); font-size: 0.78rem;">{{.ReportID}}</td>
+                <td><strong>{{.Messages}}</strong></td>
             </tr>
             {{end}}
         </tbody>
@@ -35,9 +37,12 @@
 </div>
 <div id="detail-panel">
     {{if .SelectedReport}}
-        {{template "detail" .SelectedReport}}
+    {{template "detail" .SelectedReport}}
     {{else}}
-        <p class="info-message">👆 Click directly on any row inside the table above to drill down into the Comprehensive IP inspection!</p>
+    <p class="info-message" style="margin-top: 1rem;">
+        <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: -3px;">touch_app</span>
+        Select a report row above to view the detailed IP inspection.
+    </p>
     {{end}}
 </div>
 {{end}}
