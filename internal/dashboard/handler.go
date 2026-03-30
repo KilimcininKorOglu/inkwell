@@ -132,9 +132,9 @@ func (h *Handler) handleDomainsList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isHTMX(r) {
-		h.tmpl.ExecuteTemplate(w, "domainsList", data)
+		h.render(w, "domainsList", data)
 	} else {
-		h.tmpl.ExecuteTemplate(w, "domainsLayout", data)
+		h.render(w, "domainsLayout", data)
 	}
 }
 
@@ -149,9 +149,9 @@ func (h *Handler) handleDomainNew(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isHTMX(r) {
-		h.tmpl.ExecuteTemplate(w, "domainForm", data)
+		h.render(w, "domainForm", data)
 	} else {
-		h.tmpl.ExecuteTemplate(w, "domainFormLayout", data)
+		h.render(w, "domainFormLayout", data)
 	}
 }
 
@@ -228,9 +228,9 @@ func (h *Handler) handleDomainEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isHTMX(r) {
-		h.tmpl.ExecuteTemplate(w, "domainForm", data)
+		h.render(w, "domainForm", data)
 	} else {
-		h.tmpl.ExecuteTemplate(w, "domainFormLayout", data)
+		h.render(w, "domainFormLayout", data)
 	}
 }
 
@@ -346,9 +346,9 @@ func (h *Handler) renderDomainFormError(w http.ResponseWriter, r *http.Request, 
 	}
 
 	if isHTMX(r) {
-		h.tmpl.ExecuteTemplate(w, "domainForm", data)
+		h.render(w, "domainForm", data)
 	} else {
-		h.tmpl.ExecuteTemplate(w, "domainFormLayout", data)
+		h.render(w, "domainFormLayout", data)
 	}
 }
 
@@ -455,6 +455,13 @@ func parseID(r *http.Request) (uint, error) {
 		return 0, err
 	}
 	return uint(id), nil
+}
+
+func (h *Handler) render(w http.ResponseWriter, name string, data interface{}) {
+	if err := h.tmpl.ExecuteTemplate(w, name, data); err != nil {
+		log.Printf("Template error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
 
 func isHTMX(r *http.Request) bool {
