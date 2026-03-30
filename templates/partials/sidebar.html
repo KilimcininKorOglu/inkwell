@@ -1,68 +1,26 @@
 {{define "sidebar"}}
-<div class="filter-section-title">
-    <span class="material-icons-outlined" style="font-size: 1rem;">filter_list</span>
-    Filters
+<div class="search-row">
+    <label>From</label>
+    <input type="date" name="start_date" value="{{.StartDate}}" min="{{.MinDate}}" max="{{.MaxDate}}">
 </div>
-<form hx-get="/dashboard/content" hx-target="#main-content" hx-swap="innerHTML" hx-trigger="change delay:300ms"
-    id="filter-form">
-
-    <label for="start_date">Start Date</label>
-    <input type="date" id="start_date" name="start_date" value="{{.StartDate}}" min="{{.MinDate}}" max="{{.MaxDate}}">
-
-    <label for="end_date">End Date</label>
-    <input type="date" id="end_date" name="end_date" value="{{.EndDate}}" min="{{.MinDate}}" max="{{.MaxDate}}">
-
-    <label>Domains</label>
-    <div x-data="multiSelect()"
-        x-init='init({{toJSON .AllDomains}}, {{toJSON .SelectedDomains}}, {{.SelectAllDomains}}, "domains")'>
-        {{template "multiSelect" .}}
-    </div>
-
-    <label>Organizations</label>
-    <div x-data="multiSelect()"
-        x-init='init({{toJSON .AllOrgs}}, {{toJSON .SelectedOrgs}}, {{.SelectAllOrgs}}, "orgs")'>
-        {{template "multiSelect" .}}
-    </div>
-</form>
-
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('multiSelect', () => ({
-            items: [],
-            selected: [],
-            selectAll: false,
-            fieldName: '',
-            open: false,
-            init(allItems, selectedItems, isSelectAll, name) {
-                this.items = allItems || [];
-                this.selected = selectedItems || [];
-                this.selectAll = isSelectAll;
-                this.fieldName = name;
-            },
-            toggleAll() {
-                if (this.selectAll) {
-                    this.selected = [...this.items];
-                } else {
-                    this.selected = [];
-                }
-                this.triggerFormChange();
-            },
-            onItemChange() {
-                this.selectAll = this.selected.length === this.items.length;
-                this.triggerFormChange();
-            },
-            selectedCount() {
-                return this.selected.length;
-            },
-            triggerFormChange() {
-                this.$nextTick(() => {
-                    const form = document.getElementById('filter-form');
-                    if (form) {
-                        form.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
-                });
-            }
-        }));
-    });
-</script>
+<div class="search-row">
+    <label>To</label>
+    <input type="date" name="end_date" value="{{.EndDate}}" min="{{.MinDate}}" max="{{.MaxDate}}">
+</div>
+<div class="search-row">
+    <label>Domain</label>
+    <select name="domains" multiple>
+        {{range .AllDomains}}
+        <option value="{{.}}" {{range $.SelectedDomains}}{{if eq . $}}selected{{end}}{{end}}>{{.}}</option>
+        {{end}}
+    </select>
+</div>
+<div class="search-row">
+    <label>Org</label>
+    <select name="orgs" multiple>
+        {{range .AllOrgs}}
+        <option value="{{.}}" {{range $.SelectedOrgs}}{{if eq . $}}selected{{end}}{{end}}>{{.}}</option>
+        {{end}}
+    </select>
+</div>
 {{end}}

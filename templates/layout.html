@@ -18,15 +18,40 @@
 <body>
     <header class="gmail-topbar">
         <div class="topbar-left">
-            <div class="topbar-logo">
+            <a href="/" class="topbar-logo">
                 <span class="logo-icon">🛡️</span>
                 <span class="logo-text">Inkwell</span>
-            </div>
+            </a>
         </div>
-        <form class="topbar-search" action="/" method="GET">
-            <span class="material-icons-outlined search-icon">search</span>
-            <input type="text" name="q" class="search-input" placeholder="Search reports by domain, organization, or IP..." value="{{.SearchQuery}}">
-        </form>
+        <div class="topbar-center" x-data="{ showFilters: false }">
+            <form id="search-form" action="/" method="GET">
+                <div class="topbar-search-bar">
+                    <span class="material-icons-outlined search-icon">search</span>
+                    <input type="text" name="q" class="search-input"
+                           placeholder="Search reports..."
+                           value="{{.SearchQuery}}"
+                           hx-get="/dashboard/content"
+                           hx-target="#main-content"
+                           hx-trigger="keyup changed delay:500ms"
+                           hx-include="#search-form">
+                    <button type="button" class="filter-toggle" @click="showFilters = !showFilters" title="Advanced filters">
+                        <span class="material-icons-outlined" style="font-size: 1.1rem;">tune</span>
+                    </button>
+                </div>
+                <div class="search-dropdown" x-show="showFilters" @click.outside="showFilters = false" x-cloak>
+                    {{template "sidebar" .Sidebar}}
+                    <div class="search-actions">
+                        <button type="button" class="btn btn-secondary" @click="showFilters = false"
+                                hx-get="/dashboard/content"
+                                hx-target="#main-content"
+                                hx-include="#search-form">
+                            Apply
+                        </button>
+                        <a href="/" class="btn btn-secondary">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
         <div class="topbar-right"></div>
     </header>
 
@@ -34,18 +59,14 @@
         <aside class="sidebar">
             <nav class="sidebar-nav-main">
                 <a href="/" class="nav-item active">
-                    <span class="material-icons-outlined">dashboard</span>
-                    <span>Dashboard</span>
+                    <span class="material-icons-outlined">inbox</span>
+                    <span>Reports</span>
                 </a>
                 <a href="/domains" class="nav-item">
                     <span class="material-icons-outlined">dns</span>
                     <span>Domains</span>
                 </a>
             </nav>
-            <div class="sidebar-divider"></div>
-            <div class="sidebar-filters">
-                {{template "sidebar" .Sidebar}}
-            </div>
         </aside>
 
         <div class="main-content" id="main-content">

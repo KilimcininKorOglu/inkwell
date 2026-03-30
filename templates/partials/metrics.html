@@ -1,28 +1,16 @@
 {{define "metrics"}}
-<div class="metrics-row">
-    <div class="metric-card">
-        <span class="metric-label">
-            <span class="material-icons-outlined"
-                style="font-size: 0.85rem; vertical-align: -2px; color: var(--accent-blue);">language</span>
-            Total IPs Evaluated
-        </span>
-        <span class="metric-value">{{.TotalIPs}}</span>
-    </div>
-    <div class="metric-card">
-        <span class="metric-label">
-            <span class="material-icons-outlined"
-                style="font-size: 0.85rem; vertical-align: -2px; color: var(--accent-purple);">mail</span>
-            Total Email Volume
-        </span>
-        <span class="metric-value">{{.TotalVolume}}</span>
-    </div>
-    <div class="metric-card">
-        <span class="metric-label">
-            <span class="material-icons-outlined"
-                style="font-size: 0.85rem; vertical-align: -2px; color: var(--accent-green);">verified_user</span>
-            Auth Pass Rate
-        </span>
-        <span class="metric-value">{{.PassRateStr}}</span>
-    </div>
+<div class="metric-bar">
+    <span class="metric-chip">
+        <span class="material-icons-outlined" style="color: var(--accent-blue);">language</span>
+        <span class="metric-chip-value">{{.TotalIPs}}</span> IPs
+    </span>
+    <span class="metric-chip">
+        <span class="material-icons-outlined" style="color: var(--accent-purple);">mail</span>
+        <span class="metric-chip-value">{{.TotalVolume}}</span> emails
+    </span>
+    <span class="metric-chip">
+        <span class="material-icons-outlined" style="color: var(--accent-green);">verified_user</span>
+        <span class="metric-chip-value">{{.PassRateStr}}</span> pass
+    </span>
 </div>
 {{end}}

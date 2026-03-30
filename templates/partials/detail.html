@@ -1,34 +1,42 @@
 {{define "detail"}}
-<div class="detail-view">
-    <hr class="divider">
-    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-        <span class="material-icons-outlined" style="font-size: 1.1rem; color: var(--accent-blue);">policy</span>
-        <strong>Report from {{.Organization}} for {{.Domain}}</strong>
+<div class="detail-panel">
+    <div class="detail-back" onclick="document.querySelectorAll('.mail-row').forEach(r => r.classList.remove('selected')); document.getElementById('detail-panel').innerHTML = '';">
+        <span class="material-icons-outlined" style="font-size: 1rem;">arrow_back</span>
+        Back to list
     </div>
-    <p style="color: var(--text-secondary); font-size: 0.82rem;">{{.StartDate}} to {{.EndDate}}</p>
-    <p style="font-size: 0.82rem; margin-top: 0.25rem; color: var(--text-tertiary);">
-        Policies: adkim={{.Adkim}}, aspf={{.Aspf}}, p={{.P}}, sp={{.Sp}}, pct={{.Pct}}
-    </p>
 
-    <table class="detail-table" style="margin-top: 0.75rem;">
+    <div class="detail-header">
+        <div class="detail-avatar">{{if .Domain}}{{slice .Domain 0 1}}{{end}}</div>
+        <div class="detail-meta">
+            <div class="detail-sender">{{.Domain}}</div>
+            <div class="detail-org">from {{.Organization}}</div>
+        </div>
+        <div class="detail-date">{{.StartDate}} — {{.EndDate}}</div>
+    </div>
+
+    <div class="detail-policies">
+        <span class="policy-chip">adkim: {{.Adkim}}</span>
+        <span class="policy-chip">aspf: {{.Aspf}}</span>
+        <span class="policy-chip">p: {{.P}}</span>
+        <span class="policy-chip">sp: {{.Sp}}</span>
+        <span class="policy-chip">pct: {{.Pct}}</span>
+    </div>
+
+    <table style="margin-top: 0.5rem;">
         <thead>
             <tr>
                 <th title="The source IP address of the email sender originating the message">IP</th>
-                <th title="The reverse DNS resolved hostname of the IP address">Host Name</th>
+                <th title="The reverse DNS resolved hostname of the IP address">Host</th>
                 <th title="The sum of messages sent from this IP">Count</th>
-                <th title="The DMARC policy action applied by the receiver: none (pass), quarantine, or reject">
-                    Disposition</th>
+                <th title="The DMARC policy action applied by the receiver">Disposition</th>
                 <th title="Policy override reasons applied by the receiver">Reason</th>
-                <th title="The explicit domain securely embedded in the DKIM cryptographic signature header">DKIM Domain
-                </th>
-                <th title="The raw result of validating the DKIM cryptographic signature">DKIM Auth</th>
-                <th title="The envelope-from (Return-Path) domain evaluated for SPF routing checks">SPF Domain</th>
-                <th title="The raw result of the SPF validation querying DNS for permitted ranges">SPF Auth</th>
-                <th title="Alignment: Did the passing DKIM Domain properly match the 'From' header domain?">DKIM Align
-                </th>
-                <th title="Alignment: Did the passing SPF Domain properly match the 'From' header domain?">SPF Align
-                </th>
-                <th title="Derived Overall DMARC Pass/Fail">DMARC</th>
+                <th title="The explicit domain in the DKIM signature">DKIM Domain</th>
+                <th title="The raw DKIM validation result">DKIM Auth</th>
+                <th title="The envelope-from domain evaluated for SPF">SPF Domain</th>
+                <th title="The raw SPF validation result">SPF Auth</th>
+                <th title="DKIM alignment result">DKIM Align</th>
+                <th title="SPF alignment result">SPF Align</th>
+                <th title="Derived DMARC Pass/Fail">DMARC</th>
             </tr>
         </thead>
         <tbody>

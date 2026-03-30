@@ -1,25 +1,13 @@
 {{define "content"}}
 {{if not .HasData}}
-{{template "empty" .}}
+    {{template "empty" .}}
 {{else if not .Metrics}}
-<h2 class="page-title">
-    <span class="material-icons-outlined" style="color: var(--accent-blue);">shield</span>
-    DMARC Dashboard
-</h2>
-<p class="warning-message">
-    <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: -3px;">warning</span>
-    Please select at least one Domain and one Organization from the sidebar to view data.
-</p>
+    <p class="warning-message">
+        <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: -3px;">warning</span>
+        No records match the current filters.
+    </p>
 {{else}}
-<h2 class="page-title">
-    <span class="material-icons-outlined" style="color: var(--accent-blue);">shield</span>
-    DMARC Dashboard
-</h2>
-{{template "metrics" .Metrics}}
-{{if .ChartData}}
-{{template "chart" .ChartData}}
-{{end}}
-<hr class="divider">
-{{template "reportsTable" .}}
+    {{template "metrics" .Metrics}}
+    {{template "reportsTable" .}}
 {{end}}
 {{end}}
