@@ -125,7 +125,9 @@ func ParseDMARCXML(db *gorm.DB, xmlContent string, domainID uint) error {
 				Result:   strPtr(dr.Result),
 				Selector: strPtr(dr.Selector),
 			}
-			db.Create(&ar)
+			if err := db.Create(&ar).Error; err != nil {
+				log.Printf("Failed to insert DKIM auth result: %v", err)
+			}
 		}
 
 		// SPF auth results
@@ -137,7 +139,9 @@ func ParseDMARCXML(db *gorm.DB, xmlContent string, domainID uint) error {
 				Result:   strPtr(sr.Result),
 				Selector: nil, // SPF has no selector
 			}
-			db.Create(&ar)
+			if err := db.Create(&ar).Error; err != nil {
+				log.Printf("Failed to insert SPF auth result: %v", err)
+			}
 		}
 	}
 
