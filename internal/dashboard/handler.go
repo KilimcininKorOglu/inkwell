@@ -3,7 +3,6 @@ package dashboard
 import (
 	"crypto/sha256"
 	"crypto/subtle"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -29,10 +28,6 @@ type Handler struct {
 // NewRouter creates the Chi router with all dashboard routes.
 func NewRouter(db *gorm.DB, templateDir, staticDir, adminUser, adminPassword, encryptionKey string) (chi.Router, error) {
 	funcMap := template.FuncMap{
-		"toJSON": func(v interface{}) template.JS {
-			b, _ := json.Marshal(v)
-			return template.JS(b)
-		},
 		"eq": func(a, b uint) bool {
 			return a == b
 		},
