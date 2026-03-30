@@ -430,13 +430,6 @@ func (h *Handler) buildPageData(r *http.Request) *PageData {
 		pageData.Metrics = metrics
 	}
 
-	chartData, err := FetchTimeSeriesData(h.db, startDate, endDate, domains, orgs)
-	if err != nil {
-		log.Printf("Error fetching chart data: %v", err)
-	} else {
-		pageData.ChartData = chartData
-	}
-
 	reports, err := FetchReportsList(h.db, startDate, endDate, domains, orgs, searchQuery)
 	if err != nil {
 		log.Printf("Error fetching reports: %v", err)

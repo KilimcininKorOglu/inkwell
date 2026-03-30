@@ -2,13 +2,11 @@ package dashboard
 
 // PageData is the top-level struct passed to layout.html.
 type PageData struct {
-	HasData        bool
-	SearchQuery    string
-	Sidebar        SidebarData
-	Metrics        *MetricsData
-	ChartData      *ChartData
-	Reports        []ReportRow
-	SelectedReport *ReportDetailData
+	HasData     bool
+	SearchQuery string
+	Sidebar     SidebarData
+	Metrics     *MetricsData
+	Reports     []ReportRow
 }
 
 // SidebarData holds filter state for rendering.
@@ -31,19 +29,6 @@ type MetricsData struct {
 	TotalVolume int64
 	PassRate    float64
 	PassRateStr string
-}
-
-// ChartData provides JSON-serializable data for Chart.js.
-type ChartData struct {
-	Labels      []string       `json:"Labels"`
-	Datasets    []ChartDataset `json:"Datasets"`
-	UseBarChart bool           `json:"UseBarChart"`
-}
-
-// ChartDataset is one series in the chart (one per disposition value).
-type ChartDataset struct {
-	Label string `json:"Label"`
-	Data  []int  `json:"Data"`
 }
 
 // ReportRow is one row in the master reports table.
