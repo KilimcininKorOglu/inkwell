@@ -172,8 +172,8 @@ func FetchTimeSeriesData(db *gorm.DB, startDate, endDate time.Time, domains, org
 	}, nil
 }
 
-// FetchReportsList returns the master report list.
-func FetchReportsList(db *gorm.DB, startDate, endDate time.Time, domains, orgs []string) ([]ReportRow, error) {
+// FetchReportsList returns the master report list, optionally filtered by search query.
+func FetchReportsList(db *gorm.DB, startDate, endDate time.Time, domains, orgs []string, searchQuery string) ([]ReportRow, error) {
 	endDateInclusive := endDate.AddDate(0, 0, 1)
 
 	type rawRow struct {
@@ -192,7 +192,7 @@ func FetchReportsList(db *gorm.DB, startDate, endDate time.Time, domains, orgs [
 	}
 
 	var rows []rawRow
-	err := db.Table("reports").
+	query := db.Table("reports").
 		Select(`reports.id as db_id,
 				reports.begin_date as "begin",
 				reports.end_date as "end",
@@ -208,8 +208,15 @@ func FetchReportsList(db *gorm.DB, startDate, endDate time.Time, domains, orgs [
 		Joins("LEFT JOIN records ON reports.id = records.report_id").
 		Where("reports.domain IN ?", domains).
 		Where("reports.org_name IN ?", orgs).
-		Where("reports.begin_date >= ? AND reports.begin_date <= ?", startDate, endDateInclusive).
-		Group("reports.id").
+		Where("reports.begin_date >= ? AND reports.begin_date <= ?", startDate, endDateInclusive)
+
+	if searchQuery != "" {
+		like := "%" + searchQuery + "%"
+		query = query.Where("(reports.domain LIKE ? OR reports.org_name LIKE ? OR reports.report_id LIKE ? OR records.source_ip LIKE ? OR records.host_name LIKE ?)",
+			like, like, like, like, like)
+	}
+
+	err := query.Group("reports.id").
 		Order("reports.begin_date DESC").
 		Scan(&rows).Error
 

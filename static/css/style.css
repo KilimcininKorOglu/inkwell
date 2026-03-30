@@ -153,6 +153,20 @@ body {
     color: var(--text-tertiary);
 }
 
+.search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: 'Roboto', sans-serif;
+}
+
+.search-input::placeholder {
+    color: var(--text-tertiary);
+}
+
 .topbar-right {
     display: flex;
     align-items: center;

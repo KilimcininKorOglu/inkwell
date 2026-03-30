@@ -3,6 +3,7 @@ package dashboard
 // PageData is the top-level struct passed to layout.html.
 type PageData struct {
 	HasData        bool
+	SearchQuery    string
 	Sidebar        SidebarData
 	Metrics        *MetricsData
 	ChartData      *ChartData

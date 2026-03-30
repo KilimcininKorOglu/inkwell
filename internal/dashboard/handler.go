@@ -362,6 +362,7 @@ func (h *Handler) buildPageData(r *http.Request) *PageData {
 
 	opts, _ := FetchFilterOptions(h.db)
 
+	searchQuery := r.URL.Query().Get("q")
 	startDateStr := r.URL.Query().Get("start_date")
 	endDateStr := r.URL.Query().Get("end_date")
 	domains := r.URL.Query()["domains"]
@@ -410,8 +411,9 @@ func (h *Handler) buildPageData(r *http.Request) *PageData {
 	}
 
 	pageData := &PageData{
-		HasData: hasData,
-		Sidebar: sidebar,
+		HasData:     hasData,
+		SearchQuery: searchQuery,
+		Sidebar:     sidebar,
 	}
 
 	if !hasData || len(domains) == 0 || len(orgs) == 0 {
@@ -435,7 +437,7 @@ func (h *Handler) buildPageData(r *http.Request) *PageData {
 		pageData.ChartData = chartData
 	}
 
-	reports, err := FetchReportsList(h.db, startDate, endDate, domains, orgs)
+	reports, err := FetchReportsList(h.db, startDate, endDate, domains, orgs, searchQuery)
 	if err != nil {
 		log.Printf("Error fetching reports: %v", err)
 	} else {
