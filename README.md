@@ -9,7 +9,7 @@ Inkwell continuously polls IMAP mailboxes for DMARC aggregate report emails, par
 - **Multi-Domain Support** -- Manage multiple IMAP mailboxes through the web UI with per-domain enable/disable toggle
 - **Automated IMAP Polling** -- Fetches unread DMARC reports via IMAP4 SSL with UID-based message tracking
 - **Robust Parsing** -- Processes aggregate data including IP disposition, DKIM alignment, SPF validation, and reverse DNS resolution
-- **Interactive Dashboard** -- Server-rendered UI with HTMX for live filtering, Chart.js for visualization, and drill-down IP inspection
+- **Gmail-Style Dashboard** -- Dark mode UI inspired by Gmail with conversation list, search bar with advanced filters, compact metric chips, and drill-down IP inspection
 - **Encrypted Credentials** -- IMAP passwords stored with AES-256-GCM encryption
 - **Single Binary** -- No runtime dependencies, compiles to a single Go executable (~15MB)
 
@@ -76,7 +76,7 @@ Access the dashboard at `http://localhost:8080`.
 
 ### Adding Domains
 
-1. Navigate to `/domains` (or click "Manage Domains" in the sidebar)
+1. Navigate to `/domains` (or click "Domains" in the sidebar)
 2. Click "Add Domain"
 3. Enter the IMAP server details (host, port, user, password, folder)
 4. Save -- the fetcher will begin polling on the next cycle
@@ -106,9 +106,9 @@ main.go
   |     '-- parser.go   -->  Parse XML, reverse DNS, write to MariaDB
   |
   '-- HTTP Server (Chi router)
-        |-- GET /                      Dashboard (full page)
-        |-- GET /dashboard/content     HTMX partial (metrics + chart + table)
-        |-- GET /dashboard/detail/{id} HTMX partial (IP drill-down)
+        |-- GET /                      Dashboard (Gmail mailbox UI)
+        |-- GET /dashboard/content     HTMX partial (metrics + conversation list)
+        |-- GET /dashboard/detail/{id} HTMX partial (IP drill-down reading pane)
         |-- GET /domains               Domain management (list)
         |-- GET /domains/new           Add domain form
         |-- POST /domains              Create domain
@@ -139,7 +139,7 @@ domains (1) --> reports (N) --> records (N) --> auth_results (N)
 | IMAP Client   | emersion/go-imap v2                      |
 | XML Parsing   | encoding/xml (stdlib)                    |
 | Encryption    | AES-256-GCM (crypto/aes + crypto/cipher) |
-| Frontend      | HTMX + Alpine.js + Chart.js              |
+| Frontend      | HTMX + Alpine.js                         |
 | Templates     | html/template (stdlib)                   |
 
 ## Security
