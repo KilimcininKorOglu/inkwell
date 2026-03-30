@@ -68,7 +68,7 @@ func FetchDMARCReports(domain *models.Domain) ([]string, error) {
 	log.Printf("Found %d unread messages.", len(uids))
 
 	var xmlReports []string
-	var uidsToExpunge []imap.UID
+	needsExpunge := false
 
 	for _, uid := range uids {
 		log.Printf("Processing message UID: %d", uid)
@@ -121,7 +121,7 @@ func FetchDMARCReports(domain *models.Domain) ([]string, error) {
 				if err := storeCmd.Close(); err != nil {
 					log.Printf("Error marking message %d as deleted: %v", uid, err)
 				} else {
-					uidsToExpunge = append(uidsToExpunge, uid)
+					needsExpunge = true
 					log.Printf("Successfully copied message %d to %s and marked for deletion", uid, destFolder)
 				}
 			} else {
@@ -131,7 +131,7 @@ func FetchDMARCReports(domain *models.Domain) ([]string, error) {
 	}
 
 	// Expunge moved messages
-	if len(uidsToExpunge) > 0 {
+	if needsExpunge {
 		if _, err := client.Expunge().Collect(); err != nil {
 			log.Printf("Expunge error: %v", err)
 		} else {
