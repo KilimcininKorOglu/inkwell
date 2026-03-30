@@ -172,7 +172,7 @@ func (h *Handler) handleDomainCreate(w http.ResponseWriter, r *http.Request) {
 		encrypted, err := crypto.Encrypt(password, h.encryptionKey)
 		if err != nil {
 			log.Printf("Error encrypting password: %v", err)
-			h.renderDomainFormError(w, r, "Failed to encrypt password", false, r.Form)
+			h.renderDomainFormError(w, r, "Failed to encrypt password", false)
 			return
 		}
 		password = encrypted
@@ -192,7 +192,7 @@ func (h *Handler) handleDomainCreate(w http.ResponseWriter, r *http.Request) {
 
 	if err := CreateDomain(h.db, &domain); err != nil {
 		log.Printf("Error creating domain: %v", err)
-		h.renderDomainFormError(w, r, "Failed to create domain: "+err.Error(), false, r.Form)
+		h.renderDomainFormError(w, r, "Failed to create domain: "+err.Error(), false)
 		return
 	}
 
@@ -263,7 +263,7 @@ func (h *Handler) handleDomainUpdate(w http.ResponseWriter, r *http.Request) {
 		encrypted, err := crypto.Encrypt(newPass, h.encryptionKey)
 		if err != nil {
 			log.Printf("Error encrypting password: %v", err)
-			h.renderDomainFormError(w, r, "Failed to encrypt password", true, r.Form)
+			h.renderDomainFormError(w, r, "Failed to encrypt password", true)
 			return
 		}
 		password = encrypted
@@ -281,7 +281,7 @@ func (h *Handler) handleDomainUpdate(w http.ResponseWriter, r *http.Request) {
 
 	if err := UpdateDomain(h.db, existing); err != nil {
 		log.Printf("Error updating domain: %v", err)
-		h.renderDomainFormError(w, r, "Failed to update domain: "+err.Error(), true, r.Form)
+		h.renderDomainFormError(w, r, "Failed to update domain: "+err.Error(), true)
 		return
 	}
 
@@ -325,7 +325,7 @@ func (h *Handler) handleDomainToggle(w http.ResponseWriter, r *http.Request) {
 
 // --- Helper Functions ---
 
-func (h *Handler) renderDomainFormError(w http.ResponseWriter, r *http.Request, errMsg string, isEdit bool, _ map[string][]string) {
+func (h *Handler) renderDomainFormError(w http.ResponseWriter, r *http.Request, errMsg string, isEdit bool) {
 	port, _ := strconv.Atoi(r.FormValue("imap_port"))
 	id, _ := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 
