@@ -162,9 +162,10 @@ func (h *Handler) handleDomainCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	port, _ := strconv.Atoi(r.FormValue("imap_port"))
-	if port == 0 {
-		port = 993
+	port, portErr := strconv.Atoi(r.FormValue("imap_port"))
+	if portErr != nil || port < 1 || port > 65535 {
+		h.renderDomainFormError(w, r, "Invalid IMAP port. Must be a number between 1 and 65535.", false)
+		return
 	}
 
 	// Encrypt password
@@ -257,9 +258,10 @@ func (h *Handler) handleDomainUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	port, _ := strconv.Atoi(r.FormValue("imap_port"))
-	if port == 0 {
-		port = 993
+	port, portErr := strconv.Atoi(r.FormValue("imap_port"))
+	if portErr != nil || port < 1 || port > 65535 {
+		h.renderDomainFormError(w, r, "Invalid IMAP port. Must be a number between 1 and 65535.", true)
+		return
 	}
 
 	// Keep existing encrypted password if field is blank
