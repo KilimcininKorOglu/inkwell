@@ -19,6 +19,12 @@ import (
 	"gorm.io/gorm"
 )
 
+var flashMessages = map[string]string{
+	"created": "Domain created successfully",
+	"updated": "Domain updated successfully",
+	"deleted": "Domain deleted successfully",
+}
+
 // Handler holds dependencies for HTTP handlers.
 type Handler struct {
 	db            *gorm.DB
@@ -129,7 +135,7 @@ func (h *Handler) handleDomainsList(w http.ResponseWriter, r *http.Request) {
 
 	data := DomainsPageData{
 		Domains: domains,
-		Message: r.URL.Query().Get("msg"),
+		Message: flashMessages[r.URL.Query().Get("msg")],
 	}
 
 	if isHTMX(r) {
@@ -202,7 +208,7 @@ func (h *Handler) handleDomainCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/domains?msg=Domain+created+successfully", http.StatusSeeOther)
+	http.Redirect(w, r, "/domains?msg=created", http.StatusSeeOther)
 }
 
 func (h *Handler) handleDomainEdit(w http.ResponseWriter, r *http.Request) {
@@ -296,7 +302,7 @@ func (h *Handler) handleDomainUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/domains?msg=Domain+updated+successfully", http.StatusSeeOther)
+	http.Redirect(w, r, "/domains?msg=updated", http.StatusSeeOther)
 }
 
 func (h *Handler) handleDomainDelete(w http.ResponseWriter, r *http.Request) {
@@ -317,7 +323,7 @@ func (h *Handler) handleDomainDelete(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error orphaning reports for domain %d: %v", id, err)
 	}
 
-	http.Redirect(w, r, "/domains?msg=Domain+deleted+successfully", http.StatusSeeOther)
+	http.Redirect(w, r, "/domains?msg=deleted", http.StatusSeeOther)
 }
 
 func (h *Handler) handleDomainToggle(w http.ResponseWriter, r *http.Request) {
