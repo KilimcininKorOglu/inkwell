@@ -72,8 +72,6 @@ func main() {
 					}
 				}()
 
-				models.InitDB(db)
-
 				// Fetch all enabled domains from database
 				var domains []models.Domain
 				if err := db.Where("enabled = ?", true).Find(&domains).Error; err != nil {
