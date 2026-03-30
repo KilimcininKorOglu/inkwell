@@ -313,7 +313,9 @@ func (h *Handler) handleDomainDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Nullify domain_id in reports (orphan gracefully)
-	h.db.Model(&models.Report{}).Where("domain_id = ?", id).Update("domain_id", nil)
+	if err := h.db.Model(&models.Report{}).Where("domain_id = ?", id).Update("domain_id", nil).Error; err != nil {
+		log.Printf("Error orphaning reports for domain %d: %v", id, err)
+	}
 
 	http.Redirect(w, r, "/domains?msg=Domain+deleted+successfully", http.StatusSeeOther)
 }
