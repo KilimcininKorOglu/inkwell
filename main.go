@@ -7,12 +7,12 @@ import (
 	"os"
 	"time"
 
-	"inkwell/internal/config"
-	"inkwell/internal/crypto"
-	"inkwell/internal/dashboard"
-	"inkwell/internal/fetcher"
-	"inkwell/internal/models"
-	"inkwell/internal/parser"
+	"github.com/KilimcininKorOglu/inkwell/internal/config"
+	"github.com/KilimcininKorOglu/inkwell/internal/crypto"
+	"github.com/KilimcininKorOglu/inkwell/internal/dashboard"
+	"github.com/KilimcininKorOglu/inkwell/internal/fetcher"
+	"github.com/KilimcininKorOglu/inkwell/internal/models"
+	"github.com/KilimcininKorOglu/inkwell/internal/parser"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

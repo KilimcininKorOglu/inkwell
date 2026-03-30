@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"time"
 
-	"inkwell/internal/crypto"
-	"inkwell/internal/models"
+	"github.com/KilimcininKorOglu/inkwell/internal/crypto"
+	"github.com/KilimcininKorOglu/inkwell/internal/models"
 
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"

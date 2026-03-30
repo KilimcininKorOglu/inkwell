@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"inkwell/internal/models"
+	"github.com/KilimcininKorOglu/inkwell/internal/models"
 
 	"gorm.io/gorm"
 )

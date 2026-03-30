@@ -1,4 +1,4 @@
-module inkwell
+module github.com/KilimcininKorOglu/inkwell
 
 go 1.23.0
 

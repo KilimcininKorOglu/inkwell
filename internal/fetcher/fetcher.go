@@ -10,7 +10,7 @@ import (
 	"log"
 	"strings"
 
-	"inkwell/internal/models"
+	"github.com/KilimcininKorOglu/inkwell/internal/models"
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
