@@ -131,7 +131,7 @@ func (h *Handler) handleDomainsList(w http.ResponseWriter, r *http.Request) {
 		Message: r.URL.Query().Get("msg"),
 	}
 
-	if r.Header.Get("HX-Request") == "true" {
+	if isHTMX(r) {
 		h.tmpl.ExecuteTemplate(w, "domainsList", data)
 	} else {
 		h.tmpl.ExecuteTemplate(w, "domainsLayout", data)
@@ -148,7 +148,7 @@ func (h *Handler) handleDomainNew(w http.ResponseWriter, r *http.Request) {
 		IsEdit: false,
 	}
 
-	if r.Header.Get("HX-Request") == "true" {
+	if isHTMX(r) {
 		h.tmpl.ExecuteTemplate(w, "domainForm", data)
 	} else {
 		h.tmpl.ExecuteTemplate(w, "domainFormLayout", data)
@@ -227,7 +227,7 @@ func (h *Handler) handleDomainEdit(w http.ResponseWriter, r *http.Request) {
 		IsEdit: true,
 	}
 
-	if r.Header.Get("HX-Request") == "true" {
+	if isHTMX(r) {
 		h.tmpl.ExecuteTemplate(w, "domainForm", data)
 	} else {
 		h.tmpl.ExecuteTemplate(w, "domainFormLayout", data)
@@ -345,7 +345,7 @@ func (h *Handler) renderDomainFormError(w http.ResponseWriter, r *http.Request, 
 		Error:  errMsg,
 	}
 
-	if r.Header.Get("HX-Request") == "true" {
+	if isHTMX(r) {
 		h.tmpl.ExecuteTemplate(w, "domainForm", data)
 	} else {
 		h.tmpl.ExecuteTemplate(w, "domainFormLayout", data)
@@ -455,6 +455,10 @@ func parseID(r *http.Request) (uint, error) {
 		return 0, err
 	}
 	return uint(id), nil
+}
+
+func isHTMX(r *http.Request) bool {
+	return r.Header.Get("HX-Request") == "true"
 }
 
 // basicAuth returns a middleware that enforces HTTP Basic Authentication.
