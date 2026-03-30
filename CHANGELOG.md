@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-03-30
+
+### Added
+- Multi-domain IMAP support with per-domain configurations stored in database
+- Domain management web UI at /domains with full CRUD operations
+- AES-256-GCM encryption for IMAP passwords (ENCRYPTION_KEY env var)
+- Enabled/disabled toggle for each domain to control IMAP polling
+- HTTP Basic Auth for dashboard (ADMIN_USER + ADMIN_PASSWORD env vars)
+- Sidebar navigation link to Manage Domains page
+- Domain form with validation for IMAP server, port, user, password, folder settings
+- CSS styles for buttons, forms, toggles, flash messages, and navigation
+
+### Changed
+- IMAP configuration moved from environment variables to database (domains table)
+- Fetcher loop now iterates over all enabled domains from the database
+- Report model extended with nullable domain_id foreign key for backward compatibility
+- Config struct simplified: IMAP_* fields removed, EncryptionKey added
+- Removed IMAP_* variables from .env.example and docker-compose.yml
+
 ## [1.0.0] - 2026-03-30
 
 ### Added
