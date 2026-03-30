@@ -17,7 +17,7 @@ Inkwell continuously polls IMAP mailboxes for DMARC aggregate report emails, par
 
 ### Prerequisites
 
-- Go 1.23+ (for building from source)
+- Go 1.24+ (for building from source)
 - MariaDB 10.11+ or MySQL 8.0+
 - One or more IMAP mailboxes receiving DMARC aggregate reports
 
@@ -93,9 +93,7 @@ Access the dashboard at `http://localhost:8080`.
 | `make build-darwin` | Cross-compile for macOS amd64 + arm64               |
 | `make clean`        | Remove build artifacts                              |
 
-Cross-compilation requires [zig](https://ziglang.org/): `brew install zig`
-
-CI releases use [goreleaser-cross](https://github.com/goreleaser/goreleaser-cross) (no zig needed).
+All cross-compilation uses CGO_ENABLED=0 (pure Go, no external toolchain needed).
 
 ## Architecture
 
@@ -133,7 +131,7 @@ domains (1) --> reports (N) --> records (N) --> auth_results (N)
 
 | Component     | Technology                               |
 | ------------- | ---------------------------------------- |
-| Language      | Go 1.23                                  |
+| Language      | Go 1.24                                  |
 | Web Framework | Chi v5                                   |
 | Database ORM  | GORM + go-sql-driver/mysql               |
 | IMAP Client   | emersion/go-imap v2                      |
@@ -145,8 +143,12 @@ domains (1) --> reports (N) --> records (N) --> auth_results (N)
 ## Security
 
 - IMAP passwords are encrypted at rest using AES-256-GCM before storage in the database
+- ENCRYPTION_KEY is required to store passwords -- the system rejects password storage without it
+- CSRF token validation on all state-changing POST endpoints
 - Dashboard access can be protected with HTTP Basic Auth (`ADMIN_USER` + `ADMIN_PASSWORD`)
 - Basic Auth uses constant-time comparison to prevent timing attacks
+- ZIP/GZ decompression capped at 100MB to prevent zip bomb attacks
+- Database error messages are sanitized before displaying to users
 - Static assets are served without authentication
 
 For production deployments, always run behind HTTPS (via reverse proxy) since HTTP Basic Auth transmits credentials in base64.
