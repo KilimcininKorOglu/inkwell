@@ -24,40 +24,30 @@ goto %~1
     goto end
 
 :build-linux
-    where zig >nul 2>&1 || (echo ERROR: zig is required for cross-compilation. Install from https://ziglang.org/download/ && exit /b 1)
     if not exist %BUILD_DIR% mkdir %BUILD_DIR%
-    set CGO_ENABLED=1
+    set CGO_ENABLED=0
     set GOOS=linux
     set GOARCH=amd64
-    set CC=zig cc -target x86_64-linux
-    set CXX=zig c++ -target x86_64-linux
     go build -ldflags "%LDFLAGS%" -o %BUILD_DIR%\inkwell_linux_amd64 .
     set GOARCH=arm64
-    set CC=zig cc -target aarch64-linux
-    set CXX=zig c++ -target aarch64-linux
     go build -ldflags "%LDFLAGS%" -o %BUILD_DIR%\inkwell_linux_arm64 .
     goto end
 
 :build-windows
     if not exist %BUILD_DIR% mkdir %BUILD_DIR%
-    set CGO_ENABLED=1
+    set CGO_ENABLED=0
     set GOOS=windows
     set GOARCH=amd64
     go build -ldflags "%LDFLAGS%" -o %BUILD_DIR%\inkwell_windows_amd64.exe .
     goto end
 
 :build-darwin
-    where zig >nul 2>&1 || (echo ERROR: zig is required for cross-compilation. Install from https://ziglang.org/download/ && exit /b 1)
     if not exist %BUILD_DIR% mkdir %BUILD_DIR%
-    set CGO_ENABLED=1
+    set CGO_ENABLED=0
     set GOOS=darwin
     set GOARCH=amd64
-    set CC=zig cc -target x86_64-macos
-    set CXX=zig c++ -target x86_64-macos
     go build -ldflags "%LDFLAGS%" -o %BUILD_DIR%\inkwell_darwin_amd64 .
     set GOARCH=arm64
-    set CC=zig cc -target aarch64-macos
-    set CXX=zig c++ -target aarch64-macos
     go build -ldflags "%LDFLAGS%" -o %BUILD_DIR%\inkwell_darwin_arm64 .
     goto end
 
@@ -102,8 +92,6 @@ goto %~1
     echo   fmt            - Format code
     echo   vet            - Run go vet
     echo   lint           - Run fmt and vet
-    echo.
-    echo Cross-compilation requires zig (https://ziglang.org/download/)
     goto end
 
 :end
