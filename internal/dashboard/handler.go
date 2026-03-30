@@ -401,8 +401,8 @@ func (h *Handler) buildPageData(r *http.Request) *PageData {
 	}
 
 	// Default: select all domains and orgs
-	selectAllDomains := len(domains) == 0 || len(domains) == len(opts.Domains)
-	selectAllOrgs := len(orgs) == 0 || len(orgs) == len(opts.Orgs)
+	selectAllDomains := len(domains) == 0
+	selectAllOrgs := len(orgs) == 0
 
 	if len(domains) == 0 {
 		domains = opts.Domains
