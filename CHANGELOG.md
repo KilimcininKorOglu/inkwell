@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2026-03-30
+
+### Added
+- Gmail dark mode mailbox UI with conversation list rows, compact metric chips, and reading pane detail view
+- Functional search bar with domain, organization, report ID, source IP, and hostname filtering
+- Advanced search dropdown with date range, domain, and organization filters (Gmail tune icon pattern)
+- Google Sans typography, Material Icons Outlined, Gmail color palette
+
+### Changed
+- Dashboard redesigned from table-based layout to Gmail conversation list format
+- Filters moved from sidebar to search bar dropdown panel
+- Sidebar simplified to Gmail-style label navigation (Reports + Domains)
+- Chart.js visualization removed for pure mailbox experience
+- Go module path updated to github.com/KilimcininKorOglu/inkwell
+- Removed all decorative non-functional UI elements (hamburger, help, settings, avatar icons)
+
+### Fixed
+- Docker healthcheck updated to use 127.0.0.1 instead of localhost
+
 ## [1.1.0] - 2026-03-30
 
 ### Added
