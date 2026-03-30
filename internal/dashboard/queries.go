@@ -36,9 +36,11 @@ func FetchFilterOptions(db *gorm.DB) (*FilterOptions, error) {
 		MinDate *time.Time
 		MaxDate *time.Time
 	}
-	db.Model(&models.Report{}).
+	if err := db.Model(&models.Report{}).
 		Select("MIN(begin_date) as min_date, MAX(end_date) as max_date").
-		Scan(&result)
+		Scan(&result).Error; err != nil {
+		return opts, err
+	}
 
 	if result.MinDate != nil {
 		opts.MinDate = *result.MinDate
@@ -47,15 +49,19 @@ func FetchFilterOptions(db *gorm.DB) (*FilterOptions, error) {
 		opts.MaxDate = *result.MaxDate
 	}
 
-	db.Model(&models.Report{}).
+	if err := db.Model(&models.Report{}).
 		Distinct("domain").
 		Where("domain IS NOT NULL AND domain != ''").
-		Pluck("domain", &opts.Domains)
+		Pluck("domain", &opts.Domains).Error; err != nil {
+		return opts, err
+	}
 
-	db.Model(&models.Report{}).
+	if err := db.Model(&models.Report{}).
 		Distinct("org_name").
 		Where("org_name IS NOT NULL AND org_name != ''").
-		Pluck("org_name", &opts.Orgs)
+		Pluck("org_name", &opts.Orgs).Error; err != nil {
+		return opts, err
+	}
 
 	return opts, nil
 }

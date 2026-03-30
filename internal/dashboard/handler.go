@@ -358,7 +358,10 @@ func (h *Handler) buildPageData(r *http.Request) *PageData {
 		log.Printf("Error checking data: %v", err)
 	}
 
-	opts, _ := FetchFilterOptions(h.db)
+	opts, err := FetchFilterOptions(h.db)
+	if err != nil {
+		log.Printf("Error fetching filter options: %v", err)
+	}
 
 	searchQuery := r.URL.Query().Get("q")
 	startDateStr := r.URL.Query().Get("start_date")
