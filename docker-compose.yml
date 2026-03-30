@@ -4,7 +4,7 @@ services:
     container_name: inkwell_app
     restart: unless-stopped
     ports:
-      - "${PORT:-8080}:8080"
+      - "${PORT:-12930}:8080"
     depends_on:
       db:
         condition: service_healthy
