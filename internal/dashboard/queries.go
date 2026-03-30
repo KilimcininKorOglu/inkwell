@@ -193,7 +193,9 @@ func FetchReportDetail(db *gorm.DB, reportDBID uint) (*ReportDetailData, error) 
 
 	// Get all records for this report
 	var records []models.Record
-	db.Where("report_id = ?", reportDBID).Find(&records)
+	if err := db.Where("report_id = ?", reportDBID).Find(&records).Error; err != nil {
+		return nil, err
+	}
 
 	if len(records) == 0 {
 		return &ReportDetailData{
@@ -217,7 +219,9 @@ func FetchReportDetail(db *gorm.DB, reportDBID uint) (*ReportDetailData, error) 
 	}
 
 	var authResults []models.AuthResult
-	db.Where("record_id IN ?", recordIDs).Find(&authResults)
+	if err := db.Where("record_id IN ?", recordIDs).Find(&authResults).Error; err != nil {
+		return nil, err
+	}
 
 	// Group auth results by record_id and type
 	type authGroup struct {
