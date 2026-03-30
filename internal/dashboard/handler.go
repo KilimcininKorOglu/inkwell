@@ -169,7 +169,11 @@ func (h *Handler) handleDomainCreate(w http.ResponseWriter, r *http.Request) {
 
 	// Encrypt password
 	password := r.FormValue("imap_password")
-	if password != "" && h.encryptionKey != "" {
+	if password != "" {
+		if h.encryptionKey == "" {
+			h.renderDomainFormError(w, r, "Encryption key is not configured. Cannot store IMAP passwords securely.", false)
+			return
+		}
 		encrypted, err := crypto.Encrypt(password, h.encryptionKey)
 		if err != nil {
 			log.Printf("Error encrypting password: %v", err)
@@ -260,7 +264,11 @@ func (h *Handler) handleDomainUpdate(w http.ResponseWriter, r *http.Request) {
 
 	// Keep existing encrypted password if field is blank
 	password := existing.IMAPPassword
-	if newPass := r.FormValue("imap_password"); newPass != "" && h.encryptionKey != "" {
+	if newPass := r.FormValue("imap_password"); newPass != "" {
+		if h.encryptionKey == "" {
+			h.renderDomainFormError(w, r, "Encryption key is not configured. Cannot store IMAP passwords securely.", true)
+			return
+		}
 		encrypted, err := crypto.Encrypt(newPass, h.encryptionKey)
 		if err != nil {
 			log.Printf("Error encrypting password: %v", err)
