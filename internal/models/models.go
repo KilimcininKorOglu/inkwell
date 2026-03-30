@@ -77,9 +77,4 @@ func InitDB(db *gorm.DB) {
 	if err := db.AutoMigrate(&Domain{}, &Report{}, &Record{}, &AuthResult{}); err != nil {
 		log.Printf("AutoMigrate error: %v", err)
 	}
-
-	// Graceful migration for existing databases
-	if err := db.Exec("ALTER TABLE records ADD COLUMN IF NOT EXISTS host_name VARCHAR(255)").Error; err != nil {
-		// Silently ignore — column may already exist
-	}
 }
