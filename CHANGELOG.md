@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2026-03-30
+
+### Fixed
+- Remove zig dependency from build.bat for Windows cross-compilation
+- Switch CI/CD and all build targets to CGO_ENABLED=0, removing zig requirement entirely
+
 ## [1.1.1] - 2026-03-30
 
 ### Added
