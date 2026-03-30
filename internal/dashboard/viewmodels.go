@@ -27,7 +27,6 @@ type SidebarData struct {
 type MetricsData struct {
 	TotalIPs    int
 	TotalVolume int64
-	PassRate    float64
 	PassRateStr string
 }
 

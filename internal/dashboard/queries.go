@@ -90,7 +90,6 @@ func FetchGlobalMetrics(db *gorm.DB, startDate, endDate time.Time, domains, orgs
 	return &MetricsData{
 		TotalIPs:    result.TotalIPs,
 		TotalVolume: result.TotalVolume,
-		PassRate:    passRate,
 		PassRateStr: fmt.Sprintf("%.1f%%", passRate),
 	}, nil
 }
