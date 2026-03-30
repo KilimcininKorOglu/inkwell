@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-03-30
+
+### Added
+- CSRF token validation on all POST endpoints (crypto/rand, single-use, 1-hour expiry)
+- Decompression size limit (100MB) for ZIP and GZ attachments to prevent zip bomb DoS
+- IMAP port input validation with user-friendly error messages
+- Database error checking in HasAnyData, FetchFilterOptions, and FetchReportDetail queries
+- Error checking for DKIM and SPF auth result database insertions
+- LIKE metacharacter escaping in search queries
+- Shared template shell for domain management pages (templates/partials/shell.html)
+- isHTMX helper for HTMX request detection
+- render helper for consistent template error handling
+- sanitizeDBError helper to prevent database information disclosure
+
+### Changed
+- Require ENCRYPTION_KEY to store IMAP passwords (reject without it)
+- Use predefined message codes for flash messages instead of raw query parameters
+- Use len==0 as select-all signal for filter checkboxes
+- Align Go version to 1.24 across go.mod, Dockerfile, and CI
+- Classify absent DMARC disposition as "unknown" instead of "fail"
+- Propagate Ping failure in database retry loop using connected bool
+- Replace uidsToExpunge slice with needsExpunge boolean flag
+- Extract shared base layout for domain management pages
+- Remove unused renderDomainFormError parameter
+
+### Fixed
+- Remove redundant InitDB call from fetcher loop (ran every 300s unnecessarily)
+- Remove redundant ALTER TABLE from InitDB (AutoMigrate already handles it)
+- Reference .env.example instead of .env in goreleaser config
+- Handle template render errors in domain management handlers
+- Check error when orphaning reports during domain delete
+- Sanitize database error messages in domain form responses
+- Remove dead Chart.js CDN link, FetchTimeSeriesData query, and ChartData struct
+- Remove dead multiSelect component template
+- Remove dead SelectedReport field from PageData
+- Remove unused toJSON template function (latent XSS risk)
+- Remove unused PassRate float64 from MetricsData
+
 ## [1.1.2] - 2026-03-30
 
 ### Fixed
