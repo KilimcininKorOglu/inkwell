@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/KilimcininKorOglu/inkwell/internal/crypto"
@@ -192,7 +193,7 @@ func (h *Handler) handleDomainCreate(w http.ResponseWriter, r *http.Request) {
 
 	if err := CreateDomain(h.db, &domain); err != nil {
 		log.Printf("Error creating domain: %v", err)
-		h.renderDomainFormError(w, r, "Failed to create domain: "+err.Error(), false)
+		h.renderDomainFormError(w, r, sanitizeDBError("Failed to create domain.", err), false)
 		return
 	}
 
@@ -281,7 +282,7 @@ func (h *Handler) handleDomainUpdate(w http.ResponseWriter, r *http.Request) {
 
 	if err := UpdateDomain(h.db, existing); err != nil {
 		log.Printf("Error updating domain: %v", err)
-		h.renderDomainFormError(w, r, "Failed to update domain: "+err.Error(), true)
+		h.renderDomainFormError(w, r, sanitizeDBError("Failed to update domain.", err), true)
 		return
 	}
 
@@ -455,6 +456,13 @@ func parseID(r *http.Request) (uint, error) {
 		return 0, err
 	}
 	return uint(id), nil
+}
+
+func sanitizeDBError(generic string, err error) string {
+	if strings.Contains(err.Error(), "Duplicate entry") {
+		return "A domain with this name already exists."
+	}
+	return generic + " Please check the input and try again."
 }
 
 func (h *Handler) render(w http.ResponseWriter, name string, data interface{}) {
