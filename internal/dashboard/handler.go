@@ -43,7 +43,7 @@ type Handler struct {
 }
 
 // NewRouter creates the Chi router with all dashboard routes.
-func NewRouter(db *gorm.DB, templateDir, staticDir, adminUser, adminPassword, encryptionKey string) (chi.Router, error) {
+func NewRouter(db *gorm.DB, templateDir, staticDir, adminUser, adminPassword, encryptionKey string, authDisabled bool) (chi.Router, error) {
 	funcMap := template.FuncMap{
 		"eq": func(a, b uint) bool {
 			return a == b
