@@ -189,6 +189,17 @@ func (h *Handler) handleDomainCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate domain name
+	name := strings.TrimSpace(r.FormValue("name"))
+	if name == "" {
+		h.renderDomainFormError(w, r, "Domain name is required.", false)
+		return
+	}
+	if len(name) > 253 {
+		h.renderDomainFormError(w, r, "Domain name is too long (max 253 characters).", false)
+		return
+	}
+
 	// Encrypt password
 	password := r.FormValue("imap_password")
 	if password != "" {
@@ -206,7 +217,7 @@ func (h *Handler) handleDomainCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	domain := models.Domain{
-		Name:              r.FormValue("name"),
+		Name:              name,
 		IMAPServer:        r.FormValue("imap_server"),
 		IMAPPort:          port,
 		IMAPUser:          r.FormValue("imap_user"),
@@ -306,7 +317,18 @@ func (h *Handler) handleDomainUpdate(w http.ResponseWriter, r *http.Request) {
 		password = encrypted
 	}
 
-	existing.Name = r.FormValue("name")
+	// Validate domain name
+	name := strings.TrimSpace(r.FormValue("name"))
+	if name == "" {
+		h.renderDomainFormError(w, r, "Domain name is required.", true)
+		return
+	}
+	if len(name) > 253 {
+		h.renderDomainFormError(w, r, "Domain name is too long (max 253 characters).", true)
+		return
+	}
+
+	existing.Name = name
 	existing.IMAPServer = r.FormValue("imap_server")
 	existing.IMAPPort = port
 	existing.IMAPUser = r.FormValue("imap_user")
