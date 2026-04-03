@@ -17,6 +17,7 @@ import (
 
 	"github.com/KilimcininKorOglu/inkwell/internal/crypto"
 	"github.com/KilimcininKorOglu/inkwell/internal/models"
+	"github.com/KilimcininKorOglu/inkwell/internal/validation"
 
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
@@ -224,9 +225,16 @@ func (h *Handler) handleDomainCreate(w http.ResponseWriter, r *http.Request) {
 		password = encrypted
 	}
 
+	// SSRF protection: validate IMAP server hostname
+	imapServer := r.FormValue("imap_server")
+	if imapServer != "" && validation.IsPrivateHost(imapServer) {
+		h.renderDomainFormError(w, r, "IMAP server hostname cannot resolve to a private or internal address.", false)
+		return
+	}
+
 	domain := models.Domain{
 		Name:              name,
-		IMAPServer:        r.FormValue("imap_server"),
+		IMAPServer:        imapServer,
 		IMAPPort:          port,
 		IMAPUser:          r.FormValue("imap_user"),
 		IMAPPassword:      password,
@@ -336,8 +344,15 @@ func (h *Handler) handleDomainUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// SSRF protection: validate IMAP server hostname
+	imapServer := r.FormValue("imap_server")
+	if imapServer != "" && validation.IsPrivateHost(imapServer) {
+		h.renderDomainFormError(w, r, "IMAP server hostname cannot resolve to a private or internal address.", true)
+		return
+	}
+
 	existing.Name = name
-	existing.IMAPServer = r.FormValue("imap_server")
+	existing.IMAPServer = imapServer
 	existing.IMAPPort = port
 	existing.IMAPUser = r.FormValue("imap_user")
 	existing.IMAPPassword = password

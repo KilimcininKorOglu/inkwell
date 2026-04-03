@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/KilimcininKorOglu/inkwell/internal/models"
+	"github.com/KilimcininKorOglu/inkwell/internal/validation"
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
@@ -26,6 +27,13 @@ func FetchDMARCReports(domain *models.Domain) ([]string, error) {
 	if domain.IMAPServer == "" || domain.IMAPUser == "" || domain.IMAPPassword == "" {
 		log.Printf("IMAP credentials not configured for domain %s.", domain.Name)
 		return nil, nil
+	}
+
+	// SSRF protection: block connections to private/internal IP ranges
+	if validation.IsPrivateHost(domain.IMAPServer) {
+		log.Printf("SSRF blocked: IMAP server %s resolves to a private/internal address for domain %s",
+			domain.IMAPServer, domain.Name)
+		return nil, fmt.Errorf("IMAP server %s resolves to a blocked address", domain.IMAPServer)
 	}
 
 	addr := fmt.Sprintf("%s:%d", domain.IMAPServer, domain.IMAPPort)
