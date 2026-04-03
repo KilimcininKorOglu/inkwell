@@ -92,6 +92,14 @@ func NewRouter(db *gorm.DB, templateDir, staticDir, adminUser, adminPassword, en
 		r.Post("/domains/{id}/toggle", h.handleDomainToggle)
 	})
 
+	// Start background CSRF token cleanup (every 5 minutes)
+	go func() {
+		ticker := time.NewTicker(5 * time.Minute)
+		for range ticker.C {
+			h.cleanupExpiredCSRFTokens()
+		}
+	}()
+
 	return r, nil
 }
 
@@ -583,6 +591,18 @@ func (h *Handler) validateCSRFToken(r *http.Request) bool {
 		return time.Since(entry.created) < 1*time.Hour
 	}
 	return false
+}
+
+// cleanupExpiredCSRFTokens removes CSRF tokens older than 1 hour from the store.
+func (h *Handler) cleanupExpiredCSRFTokens() {
+	now := time.Now()
+	h.csrfTokens.Range(func(key, value interface{}) bool {
+		entry := value.(csrfEntry)
+		if now.Sub(entry.created) > 1*time.Hour {
+			h.csrfTokens.Delete(key)
+		}
+		return true
+	})
 }
 
 func isHTMX(r *http.Request) bool {
