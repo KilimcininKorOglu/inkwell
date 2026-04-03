@@ -501,8 +501,19 @@ func (h *Handler) buildPageData(r *http.Request) *PageData {
 		return pageData
 	}
 
-	startDate, _ := time.ParseInLocation("2006-01-02", startDateStr, time.Local)
-	endDate, _ := time.ParseInLocation("2006-01-02", endDateStr, time.Local)
+	var startDate, endDate time.Time
+	var parseErr error
+	startDate, parseErr = time.ParseInLocation("2006-01-02", startDateStr, time.Local)
+	if parseErr != nil {
+		startDate = minDate
+	}
+	endDate, parseErr = time.ParseInLocation("2006-01-02", endDateStr, time.Local)
+	if parseErr != nil {
+		endDate = maxDate
+	}
+	if startDate.After(endDate) {
+		startDate, endDate = endDate, startDate
+	}
 
 	metrics, err := FetchGlobalMetrics(h.db, startDate, endDate, domains, orgs)
 	if err != nil {
