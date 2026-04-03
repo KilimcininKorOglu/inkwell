@@ -53,7 +53,7 @@
                         Edit
                     </a>
                     <form method="POST" action="/domains/{{.ID}}/delete" style="display:inline;"
-                        onsubmit="return confirm('Delete domain {{.Name}}? Reports will be preserved.');">
+                        onsubmit="return confirm('Delete this domain? Reports will be preserved.');">
                         <input type="hidden" name="_csrf" value="{{$.CSRFToken}}">
                         <button type="submit" class="btn btn-sm btn-danger">
                             <span class="material-icons-outlined" style="font-size: 0.85rem;">delete</span>
