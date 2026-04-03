@@ -66,6 +66,9 @@ func main() {
 	// Start background fetcher goroutine (iterates over all enabled domains)
 	go func() {
 		interval := time.Duration(cfg.FetchInterval) * time.Second
+		if interval < time.Minute {
+			interval = time.Minute
+		}
 		for {
 			func() {
 				defer func() {

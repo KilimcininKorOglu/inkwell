@@ -58,6 +58,9 @@ func getEnv(key, defaultVal string) string {
 func getEnvInt(key string, defaultVal int) int {
 	if v := os.Getenv(key); v != "" {
 		if i, err := strconv.Atoi(v); err == nil {
+			if i < 60 { // minimum 1 minute to prevent CPU exhaustion
+				i = 60
+			}
 			return i
 		}
 	}
