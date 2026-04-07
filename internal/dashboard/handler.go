@@ -59,8 +59,7 @@ func NewRouter(db *gorm.DB, templateDir, staticDir, adminUser, adminPassword, en
 		return nil, fmt.Errorf("failed to parse layout: %w", err)
 	}
 
-	tmpl, err = tmpl.ParseGlob(filepath.Join(templateDir, "components", "*.html"))
-	if err != nil {
+	if _, err := tmpl.ParseGlob(filepath.Join(templateDir, "components", "*.html")); err != nil {
 		log.Printf("Note: no component templates found: %v", err)
 	}
 
