@@ -54,16 +54,18 @@
 
     <div class="app-layout">
         <aside class="sidebar">
-            <nav class="sidebar-nav-main">
-                <a href="/" class="nav-item active">
-                    <span class="material-icons-outlined">inbox</span>
-                    <span>Reports</span>
-                </a>
-                <a href="/domains" class="nav-item">
-                    <span class="material-icons-outlined">dns</span>
-                    <span>Domains</span>
-                </a>
-            </nav>
+            <a href="/" class="nav-item{{if not .SelectedDomain}} active{{end}}"
+               hx-get="/" hx-target="#main-content" hx-push-url="true">
+                <span class="material-icons-outlined">inbox</span>
+                <span>Inbox</span>
+            </a>
+            {{range .AllDomains}}
+            <a href="/?domain={{.}}" class="nav-item{{if eq . $.SelectedDomain}} active{{end}}"
+               hx-get="/dashboard/content?domain={{.}}" hx-target="#main-content" hx-push-url="true">
+                <span class="material-icons-outlined">label</span>
+                <span>{{.}}</span>
+            </a>
+            {{end}}
         </aside>
 
         <div class="main-content" id="main-content">

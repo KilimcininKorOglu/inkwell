@@ -470,6 +470,12 @@ func (h *Handler) buildPageData(r *http.Request) *PageData {
 	endDateStr := r.URL.Query().Get("end_date")
 	domains := r.URL.Query()["domains"]
 	orgs := r.URL.Query()["orgs"]
+	selectedDomain := r.URL.Query().Get("domain")
+
+	// Selected domain from sidebar overrides multi-select
+	if selectedDomain != "" {
+		domains = []string{selectedDomain}
+	}
 
 	// Default date range: last 7 days
 	maxDate := opts.MaxDate
@@ -507,16 +513,18 @@ func (h *Handler) buildPageData(r *http.Request) *PageData {
 		EndDate:          endDateStr,
 		AllDomains:       opts.Domains,
 		SelectedDomains:  domains,
-		SelectAllDomains: selectAllDomains,
+		SelectAllDomains: selectAllDomains && selectedDomain == "",
 		AllOrgs:          opts.Orgs,
 		SelectedOrgs:     orgs,
 		SelectAllOrgs:    selectAllOrgs,
 	}
 
 	pageData := &PageData{
-		HasData:     hasData,
-		SearchQuery: searchQuery,
-		Sidebar:     sidebar,
+		HasData:        hasData,
+		SearchQuery:    searchQuery,
+		Sidebar:        sidebar,
+		AllDomains:     opts.Domains,
+		SelectedDomain: selectedDomain,
 	}
 
 	if !hasData || len(domains) == 0 || len(orgs) == 0 {
