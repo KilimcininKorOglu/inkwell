@@ -1,17 +1,14 @@
 {{define "detail"}}
 <div class="detail-panel">
-    <div class="detail-back" onclick="document.querySelectorAll('.mail-row').forEach(r => r.classList.remove('selected')); document.getElementById('detail-panel').innerHTML = '';">
-        <span class="material-icons-outlined" style="font-size: 1rem;">arrow_back</span>
-        Back to list
-    </div>
-
     <div class="detail-header">
-        <div class="detail-avatar">{{if .Domain}}{{slice .Domain 0 1}}{{end}}</div>
+        <div class="detail-avatar" onclick="document.querySelectorAll('.mail-row').forEach(r => r.classList.remove('selected')); document.getElementById('detail-panel').innerHTML = '';">
+            <span class="material-icons-outlined" style="font-size: 16px; cursor: pointer;">arrow_back</span>
+        </div>
         <div class="detail-meta">
             <div class="detail-sender">{{.Domain}}</div>
             <div class="detail-org">from {{.Organization}}</div>
+            <div class="detail-date" style="padding: 0;">{{.StartDate}} — {{.EndDate}}</div>
         </div>
-        <div class="detail-date">{{.StartDate}} — {{.EndDate}}</div>
     </div>
 
     <div class="detail-policies">
@@ -22,31 +19,31 @@
         <span class="policy-chip">pct: {{.Pct}}</span>
     </div>
 
-    <table style="margin-top: 0.5rem;">
+    <table>
         <thead>
             <tr>
-                <th title="The source IP address of the email sender originating the message">IP</th>
-                <th title="The reverse DNS resolved hostname of the IP address">Host</th>
-                <th title="The sum of messages sent from this IP">Count</th>
-                <th title="The DMARC policy action applied by the receiver">Disposition</th>
-                <th title="Policy override reasons applied by the receiver">Reason</th>
-                <th title="The explicit domain in the DKIM signature">DKIM Domain</th>
-                <th title="The raw DKIM validation result">DKIM Auth</th>
-                <th title="The envelope-from domain evaluated for SPF">SPF Domain</th>
-                <th title="The raw SPF validation result">SPF Auth</th>
-                <th title="DKIM alignment result">DKIM Align</th>
-                <th title="SPF alignment result">SPF Align</th>
-                <th title="Derived DMARC Pass/Fail">DMARC</th>
+                <th>IP</th>
+                <th>Host</th>
+                <th>Count</th>
+                <th>Disposition</th>
+                <th>Reason</th>
+                <th>DKIM Domain</th>
+                <th>DKIM</th>
+                <th>SPF Domain</th>
+                <th>SPF</th>
+                <th>DKIM Align</th>
+                <th>SPF Align</th>
+                <th>DMARC</th>
             </tr>
         </thead>
         <tbody>
             {{range .Records}}
             <tr>
-                <td><strong>{{.SourceIP}}</strong></td>
-                <td style="color: var(--text-secondary);">{{.HostName}}</td>
-                <td><strong>{{.Count}}</strong></td>
+                <td style="font-family: var(--mono); font-size: var(--mono-sm);"><strong>{{.SourceIP}}</strong></td>
+                <td style="color: var(--text-dim);">{{.HostName}}</td>
+                <td style="font-family: var(--mono); font-size: var(--mono-sm);"><strong>{{.Count}}</strong></td>
                 <td>{{.Disposition}}</td>
-                <td style="color: var(--text-tertiary);">{{.Reason}}</td>
+                <td style="color: var(--text-muted);">{{.Reason}}</td>
                 <td>{{.DKIMDomain}}</td>
                 <td>{{.DKIMAuth}}</td>
                 <td>{{.SPFDomain}}</td>

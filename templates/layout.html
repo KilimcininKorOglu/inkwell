@@ -4,11 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Inkwell</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='1em' font-size='80' fill='%2322c55e'>&#x26A1;</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&family=Material+Icons+Outlined&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="/static/css/style.css">
@@ -18,8 +17,7 @@
     <header class="gmail-topbar">
         <div class="topbar-left">
             <a href="/" class="topbar-logo">
-                <span class="logo-icon">🛡️</span>
-                <span class="logo-text">Inkwell</span>
+                <span class="logo-text">inkwell</span>
             </a>
         </div>
         <div class="topbar-center" x-data="{ showFilters: false }">
@@ -27,14 +25,14 @@
                 <div class="topbar-search-bar">
                     <span class="material-icons-outlined search-icon">search</span>
                     <input type="text" name="q" class="search-input"
-                           placeholder="Search reports..."
+                           placeholder="search reports"
                            value="{{.SearchQuery}}"
                            hx-get="/dashboard/content"
                            hx-target="#main-content"
                            hx-trigger="keyup changed delay:500ms"
                            hx-include="#search-form">
-                    <button type="button" class="filter-toggle" @click="showFilters = !showFilters" title="Advanced filters">
-                        <span class="material-icons-outlined" style="font-size: 1.1rem;">tune</span>
+                    <button type="button" class="filter-toggle" @click="showFilters = !showFilters" title="Filters">
+                        <span class="material-icons-outlined" style="font-size: 16px;">tune</span>
                     </button>
                 </div>
                 <div class="search-dropdown" x-show="showFilters" @click.outside="showFilters = false" x-cloak>
@@ -57,11 +55,11 @@
     <div class="app-layout">
         <aside class="sidebar">
             <nav class="sidebar-nav-main">
-                <a href="/" class="nav-item active">
+                <a href="/" class="nav-item{{if eq .ActiveNav "inbox"}} active{{end}}">
                     <span class="material-icons-outlined">inbox</span>
                     <span>Reports</span>
                 </a>
-                <a href="/domains" class="nav-item">
+                <a href="/domains" class="nav-item{{if eq .ActiveNav "domains"}} active{{end}}">
                     <span class="material-icons-outlined">dns</span>
                     <span>Domains</span>
                 </a>

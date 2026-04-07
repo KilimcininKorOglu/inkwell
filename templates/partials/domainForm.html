@@ -1,14 +1,13 @@
 {{define "domainForm"}}
 <div>
     <h2 class="page-title">
-        <span class="material-icons-outlined" style="color: var(--accent-blue);">{{if
-            .IsEdit}}edit{{else}}add_circle{{end}}</span>
+        <span class="material-icons-outlined">{{if .IsEdit}}edit{{else}}add_circle{{end}}</span>
         {{if .IsEdit}}Edit Domain{{else}}Add Domain{{end}}
     </h2>
 
     {{if .Error}}
     <div class="flash-message flash-error">
-        <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: -3px;">error</span>
+        <span class="material-icons-outlined" style="font-size: 16px;">error</span>
         {{.Error}}
     </div>
     {{end}}
@@ -70,15 +69,13 @@
         <div class="form-group">
             <label class="form-label form-checkbox">
                 <input type="checkbox" name="enabled" {{if .Domain.Enabled}}checked{{end}}>
-                Enable IMAP polling for this domain
+                Enable IMAP polling
             </label>
         </div>
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
-                <span class="material-icons-outlined" style="font-size: 1rem;">{{if
-                    .IsEdit}}save{{else}}add{{end}}</span>
-                {{if .IsEdit}}Update Domain{{else}}Create Domain{{end}}
+                {{if .IsEdit}}Update{{else}}Create{{end}}
             </button>
             <a href="/domains" class="btn btn-secondary">Cancel</a>
         </div>
