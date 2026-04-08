@@ -9,7 +9,7 @@ Inkwell continuously polls IMAP mailboxes for DMARC aggregate report emails, par
 - **Multi-Domain Support** -- Manage multiple IMAP mailboxes through the web UI with per-domain enable/disable toggle
 - **Automated IMAP Polling** -- Fetches unread DMARC reports via IMAP4 SSL with UID-based message tracking
 - **Robust Parsing** -- Processes aggregate data including IP disposition, DKIM alignment, SPF validation, and reverse DNS resolution
-- **Gmail-Style Dashboard** -- Dark mode UI inspired by Gmail with conversation list, search bar with advanced filters, compact metric chips, and drill-down IP inspection
+- **Gmail-Style Dashboard** -- Pure black UI with green accents, form-based login, conversation list, search bar with advanced filters, compact metric chips, and drill-down IP inspection
 - **Encrypted Credentials** -- IMAP passwords stored with AES-256-GCM encryption
 - **Single Binary** -- No runtime dependencies, compiles to a single Go executable (~15MB)
 
@@ -56,8 +56,8 @@ Add it to your `.env` as `ENCRYPTION_KEY`.
 | `DB_ROOT_PASSWORD` |          | MariaDB root password (Docker setup only)    |
 | `FETCH_INTERVAL` | `300`      | Seconds between IMAP polling cycles          |
 | `PORT`           | `8080`     | Dashboard HTTP port                          |
-| `ADMIN_USER`     |            | Dashboard login username (blank = no auth)   |
-| `ADMIN_PASSWORD` |            | Dashboard login password (blank = no auth)   |
+| `ADMIN_USER`     |            | Dashboard login username (required)          |
+| `ADMIN_PASSWORD` |            | Dashboard login password (required)          |
 | `ENCRYPTION_KEY` |            | 32-byte hex key for AES-256-GCM encryption   |
 
 IMAP server settings are configured per-domain through the web UI at `/domains`, not via environment variables.
@@ -100,20 +100,23 @@ All cross-compilation uses CGO_ENABLED=0 (pure Go, no external toolchain needed)
 ```
 main.go
   |-- goroutine: Multi-Domain IMAP Fetcher (background polling)
-  |     |-- fetcher.go  -->  Per-domain IMAP connect, extract XML from ZIP/GZ/XML
-  |     '-- parser.go   -->  Parse XML, reverse DNS, write to MariaDB
+  |     |-- fetcher.go  -->  Per-domain IMAP connect (IP-pinned, SSRF-safe), extract XML from ZIP/GZ/XML
+  |     '-- parser.go   -->  Parse XML, rate-limited reverse DNS, write to MariaDB
   |
-  '-- HTTP Server (Chi router)
-        |-- GET /                      Dashboard (Gmail mailbox UI)
-        |-- GET /dashboard/content     HTMX partial (metrics + conversation list)
-        |-- GET /dashboard/detail/{id} HTMX partial (IP drill-down reading pane)
-        |-- GET /domains               Domain management (list)
-        |-- GET /domains/new           Add domain form
-        |-- POST /domains              Create domain
-        |-- GET /domains/{id}/edit     Edit domain form
-        |-- POST /domains/{id}         Update domain
-        |-- POST /domains/{id}/delete  Delete domain
-        '-- POST /domains/{id}/toggle  Enable/disable domain
+  '-- HTTP Server (Chi router, session-based auth)
+        |-- GET /login                   Login page (public)
+        |-- POST /login                  Credential validation + session cookie (public)
+        |-- GET /                        Dashboard (Gmail mailbox UI, requires session)
+        |-- GET /dashboard/content       HTMX partial (metrics + conversation list)
+        |-- GET /dashboard/detail/{id}   HTMX partial (IP drill-down reading pane)
+        |-- GET /domains                 Domain management (list)
+        |-- GET /domains/new             Add domain form
+        |-- POST /domains                Create domain (CSRF protected)
+        |-- GET /domains/{id}/edit       Edit domain form
+        |-- POST /domains/{id}           Update domain (CSRF protected)
+        |-- POST /domains/{id}/delete    Delete domain (CSRF protected)
+        |-- POST /domains/{id}/toggle    Enable/disable domain (CSRF protected)
+        |-- POST /logout                 Destroy session cookie, redirect to /login
 ```
 
 ### Database Schema
@@ -144,14 +147,16 @@ domains (1) --> reports (N) --> records (N) --> auth_results (N)
 
 - IMAP passwords are encrypted at rest using AES-256-GCM before storage in the database
 - ENCRYPTION_KEY is required to store passwords -- the system rejects password storage without it
+- Form-based login with encrypted cookie sessions (`gorilla/securecookie`, 7-day TTL, HttpOnly + SameSite=Lax)
+- Credentials verified via SHA-256 + constant-time comparison to prevent timing attacks
 - CSRF token validation on all state-changing POST endpoints
-- Dashboard access can be protected with HTTP Basic Auth (`ADMIN_USER` + `ADMIN_PASSWORD`)
-- Basic Auth uses constant-time comparison to prevent timing attacks
+- SSRF protection: IMAP hostname validated against private IP ranges; DNS rebinding blocked via IP-pinned dialer
+- DNS PTR lookups rate-limited to 10K per process to prevent amplification
 - ZIP/GZ decompression capped at 100MB to prevent zip bomb attacks
 - Database error messages are sanitized before displaying to users
 - Static assets are served without authentication
 
-For production deployments, always run behind HTTPS (via reverse proxy) since HTTP Basic Auth transmits credentials in base64.
+For production deployments, always run behind HTTPS (via reverse proxy).
 
 ## Reverse Proxy
 
