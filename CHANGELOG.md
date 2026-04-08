@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-04-08
+
+### Added
+- Form-based login page with encrypted cookie sessions (gorilla/securecookie, 7-day TTL)
+- Logout button in topbar, POST /logout to destroy session
+- SSRF protection: DNS rebinding blocked via IP-pinned dialer; private IP ranges rejected
+- DNS PTR lookup rate limiting (10K per-process cap) with IP format validation
+- Domain folders in sidebar for filtering reports by domain
+
+### Changed
+- Replaced HTTP Basic Auth with form-based login and session middleware
+- UI redesigned with pure black (#000000) background and green (#22c55e) accent
+- Auth is now mandatory -- removed AUTH_DISABLED env var and opt-out path
+- FETCH_INTERVAL minimum enforced at 60 seconds to prevent CPU exhaustion
+
+### Fixed
+- Template nil pointer panic on missing components directory
+- Auth disabled by default when ADMIN_USER/ADMIN_PASSWORD are empty
+- Unbounded CSRF token memory growth (added 50K hard cap + periodic cleanup)
+- Unbounded date range enabling full-table scan (max 90-day span enforced)
+- Stored XSS via domain name in inline JavaScript confirm() call
+- Empty/whitespace domain names accepted without server-side validation
+
 ## [1.2.0] - 2026-03-30
 
 ### Added
