@@ -29,15 +29,15 @@ func FetchDMARCReports(domain *models.Domain) ([]string, error) {
 		return nil, nil
 	}
 
-	// SSRF protection: block connections to private/internal IP ranges
-	if validation.IsPrivateHost(domain.IMAPServer) {
-		log.Printf("SSRF blocked: IMAP server %s resolves to a private/internal address for domain %s",
-			domain.IMAPServer, domain.Name)
-		return nil, fmt.Errorf("IMAP server %s resolves to a blocked address", domain.IMAPServer)
+	// SSRF protection: resolve IP once, skip private ranges, use IP directly
+	publicIP, err := validation.ResolvePublicIP(domain.IMAPServer)
+	if err != nil {
+		log.Printf("SSRF blocked: %v for domain %s", err, domain.Name)
+		return nil, fmt.Errorf("IMAP server %s validation failed: %w", domain.IMAPServer, err)
 	}
 
-	addr := fmt.Sprintf("%s:%d", domain.IMAPServer, domain.IMAPPort)
-	log.Printf("Connecting to IMAP %s...", addr)
+	addr := fmt.Sprintf("%s:%d", publicIP, domain.IMAPPort)
+	log.Printf("Connecting to IMAP %s (resolved from %s)...", addr, domain.IMAPServer)
 
 	client, err := imapclient.DialTLS(addr, &imapclient.Options{
 		TLSConfig: &tls.Config{},

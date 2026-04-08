@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"fmt"
 	"net"
 )
 
@@ -22,6 +23,30 @@ func IsPrivateHost(hostname string) bool {
 		}
 	}
 	return false
+}
+
+// ResolvePublicIP resolves a hostname and returns the first public IP.
+// This prevents DNS rebinding by using the resolved IP directly for
+// connections instead of re-resolving the hostname.
+func ResolvePublicIP(hostname string) (string, error) {
+	ips, err := net.LookupHost(hostname)
+	if err != nil {
+		return "", fmt.Errorf("DNS lookup failed for %s: %w", hostname, err)
+	}
+	if len(ips) == 0 {
+		return "", fmt.Errorf("no IP addresses resolved for %s", hostname)
+	}
+	for _, ip := range ips {
+		parsedIP := net.ParseIP(ip)
+		if parsedIP == nil {
+			continue
+		}
+		if isPrivateIP(parsedIP) {
+			continue
+		}
+		return ip, nil
+	}
+	return "", fmt.Errorf("all resolved IPs are in private/internal ranges for %s", hostname)
 }
 
 func isPrivateIP(ip net.IP) bool {
