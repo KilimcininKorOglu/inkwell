@@ -8,12 +8,34 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/KilimcininKorOglu/inkwell/internal/models"
 
 	"gorm.io/gorm"
 )
+
+// ptrLookupCap limits the number of reverse DNS lookups per process lifetime
+// to prevent DNS amplification from untrusted DMARC source IPs.
+var ptrLookupCount atomic.Int64
+
+const maxPTRLookupsPerProcess = 10000
+
+func tryPTRLookup(ctx context.Context, ip string) ([]string, error) {
+	parsed := net.ParseIP(ip)
+	if parsed == nil {
+		return nil, fmt.Errorf("invalid IP format")
+	}
+	if ptrLookupCount.Load() >= maxPTRLookupsPerProcess {
+		return nil, fmt.Errorf("PTR lookup rate limit reached (max %d)", maxPTRLookupsPerProcess)
+	}
+	names, err := net.DefaultResolver.LookupAddr(ctx, ip)
+	if err == nil {
+		ptrLookupCount.Add(1)
+	}
+	return names, err
+}
 
 // ParseDMARCXML parses a single DMARC XML string and saves it to the database.
 // domainID links the report to the source domain configuration (0 means unlinked).
@@ -85,11 +107,11 @@ func ParseDMARCXML(db *gorm.DB, xmlContent string, domainID uint) error {
 
 		headerFrom := rec.Identifiers.HeaderFrom
 
-		// Reverse DNS with 1-second timeout
+		// Reverse DNS with 1-second timeout and rate limiting
 		var hostName *string
 		if row.SourceIP != "" {
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-			names, err := net.DefaultResolver.LookupAddr(ctx, row.SourceIP)
+			names, err := tryPTRLookup(ctx, row.SourceIP)
 			cancel()
 			if err == nil && len(names) > 0 {
 				// Remove trailing dot from reverse DNS result
