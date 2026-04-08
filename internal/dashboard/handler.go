@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/KilimcininKorOglu/inkwell/internal/crypto"
@@ -40,6 +41,7 @@ type Handler struct {
 	tmpl          *template.Template
 	encryptionKey string
 	csrfTokens    sync.Map
+	csrfCount     int64
 }
 
 // NewRouter creates the Chi router with all dashboard routes.
@@ -73,8 +75,19 @@ func NewRouter(db *gorm.DB, templateDir, staticDir, adminUser, adminPassword, en
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
-		if adminUser != "" && adminPassword != "" {
+		if authDisabled {
+			log.Println("WARNING: Authentication is explicitly disabled via AUTH_DISABLED. Dashboard is publicly accessible.")
+		} else if adminUser != "" && adminPassword != "" {
 			r.Use(basicAuth(adminUser, adminPassword))
+		} else {
+			log.Println("")
+			log.Println("============================================================")
+			log.Println("  WARNING: ADMIN_USER and/or ADMIN_PASSWORD not set.")
+			log.Println("  Dashboard is publicly accessible with no authentication.")
+			log.Println("  Set both variables to enable authentication, or set")
+			log.Println("  AUTH_DISABLED=true to suppress this warning.")
+			log.Println("============================================================")
+			log.Println("")
 		}
 
 		// Dashboard routes
@@ -533,6 +546,8 @@ func (h *Handler) buildPageData(r *http.Request) *PageData {
 
 	var startDate, endDate time.Time
 	var parseErr error
+	const maxDateRange = 90 // days
+
 	startDate, parseErr = time.ParseInLocation("2006-01-02", startDateStr, time.Local)
 	if parseErr != nil {
 		startDate = minDate
@@ -543,6 +558,19 @@ func (h *Handler) buildPageData(r *http.Request) *PageData {
 	}
 	if startDate.After(endDate) {
 		startDate, endDate = endDate, startDate
+	}
+	// Clamp dates to database min/max and enforce max 90-day range
+	if startDate.Before(minDate) {
+		startDate = minDate
+	}
+	if endDate.After(maxDate.AddDate(0, 0, 1)) {
+		endDate = maxDate
+	}
+	if endDate.Sub(startDate).Hours() > float64(maxDateRange*24) {
+		startDate = endDate.AddDate(0, 0, -maxDateRange)
+		if startDate.Before(minDate) {
+			startDate = minDate
+		}
 	}
 
 	metrics, err := FetchGlobalMetrics(h.db, startDate, endDate, domains, orgs)
@@ -592,7 +620,13 @@ func (h *Handler) render(w http.ResponseWriter, name string, data interface{}) {
 	}
 }
 
+const maxCSRFTokens = 50000 // ~10MB max, covers ~20 min at 40 req/s
+
 func (h *Handler) generateCSRFToken() string {
+	// Periodically clean if approaching hard cap (every 100 tokens above 90%)
+	if atomic.AddInt64(&h.csrfCount, 1)%100 == 0 {
+		h.cleanupExpiredCSRFTokens()
+	}
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		log.Printf("Error generating CSRF token: %v", err)
