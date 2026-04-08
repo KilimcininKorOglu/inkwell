@@ -120,3 +120,12 @@ type DomainFormValues struct {
 	IMAPMoveFolderErr string
 	Enabled           bool
 }
+
+// --- Login ViewModels ---
+
+// LoginData is passed to the login page template.
+type LoginData struct {
+	Username  string
+	Error     string
+	CSRFToken string
+}

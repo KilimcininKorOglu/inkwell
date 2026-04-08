@@ -13,6 +13,7 @@ require (
 require (
 	github.com/emersion/go-sasl v0.0.0-20231106173351-e73c9f7bad43 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	golang.org/x/text v0.14.0 // indirect

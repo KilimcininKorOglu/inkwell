@@ -127,7 +127,7 @@ func main() {
 	}()
 
 	// Create dashboard router
-	router, err := dashboard.NewRouter(db, "templates", "static", cfg.AdminUser, cfg.AdminPassword, cfg.EncryptionKey, cfg.AuthDisabled)
+	router, err := dashboard.NewRouter(db, "templates", "static", cfg.AdminUser, cfg.AdminPassword, cfg.EncryptionKey)
 	if err != nil {
 		log.Fatalf("Failed to create router: %v", err)
 	}

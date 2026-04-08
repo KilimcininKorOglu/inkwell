@@ -21,6 +21,7 @@ import (
 	"github.com/KilimcininKorOglu/inkwell/internal/validation"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/securecookie"
 	"gorm.io/gorm"
 )
 
@@ -40,12 +41,15 @@ type Handler struct {
 	db            *gorm.DB
 	tmpl          *template.Template
 	encryptionKey string
+	secureCookie  *securecookie.SecureCookie
+	userHash      [32]byte
+	passHash      [32]byte
 	csrfTokens    sync.Map
 	csrfCount     int64
 }
 
 // NewRouter creates the Chi router with all dashboard routes.
-func NewRouter(db *gorm.DB, templateDir, staticDir, adminUser, adminPassword, encryptionKey string, authDisabled bool) (chi.Router, error) {
+func NewRouter(db *gorm.DB, templateDir, staticDir, adminUser, adminPassword, encryptionKey string) (chi.Router, error) {
 	funcMap := template.FuncMap{
 		"eq": func(a, b uint) bool {
 			return a == b
@@ -65,30 +69,43 @@ func NewRouter(db *gorm.DB, templateDir, staticDir, adminUser, adminPassword, en
 		log.Printf("Note: no component templates found: %v", err)
 	}
 
-	h := &Handler{db: db, tmpl: tmpl, encryptionKey: encryptionKey}
+	userHash := sha256.Sum256([]byte(adminUser))
+	passHash := sha256.Sum256([]byte(adminPassword))
+
+	// Use encryption key for secure cookie (needs 32 bytes for hash + 32 for block)
+	cookieKey := make([]byte, 64)
+	if len(encryptionKey) > 0 {
+		keyBytes := []byte(encryptionKey)
+		for i := range cookieKey {
+			cookieKey[i] = keyBytes[i%len(keyBytes)]
+		}
+	}
+	hashKey := cookieKey[:32]
+	blockKey := cookieKey[32:]
+
+	h := &Handler{
+		db:            db,
+		tmpl:          tmpl,
+		encryptionKey: encryptionKey,
+		secureCookie:  securecookie.New(hashKey, blockKey),
+		userHash:      userHash,
+		passHash:      passHash,
+		csrfTokens:    sync.Map{},
+	}
 
 	r := chi.NewRouter()
 
-	// Static files (no auth required)
+	// Public routes (no auth required)
 	fs := http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir)))
 	r.Handle("/static/*", fs)
 
-	// Protected routes
+	// Login routes
+	r.Get("/login", h.handleLoginPage)
+	r.Post("/login", h.handleLogin)
+
+	// Protected routes (session-based auth)
 	r.Group(func(r chi.Router) {
-		if authDisabled {
-			log.Println("WARNING: Authentication is explicitly disabled via AUTH_DISABLED. Dashboard is publicly accessible.")
-		} else if adminUser != "" && adminPassword != "" {
-			r.Use(basicAuth(adminUser, adminPassword))
-		} else {
-			log.Println("")
-			log.Println("============================================================")
-			log.Println("  WARNING: ADMIN_USER and/or ADMIN_PASSWORD not set.")
-			log.Println("  Dashboard is publicly accessible with no authentication.")
-			log.Println("  Set both variables to enable authentication, or set")
-			log.Println("  AUTH_DISABLED=true to suppress this warning.")
-			log.Println("============================================================")
-			log.Println("")
-		}
+		r.Use(h.sessionAuth)
 
 		// Dashboard routes
 		r.Get("/", h.handleIndex)
@@ -103,6 +120,7 @@ func NewRouter(db *gorm.DB, templateDir, staticDir, adminUser, adminPassword, en
 		r.Post("/domains/{id}", h.handleDomainUpdate)
 		r.Post("/domains/{id}/delete", h.handleDomainDelete)
 		r.Post("/domains/{id}/toggle", h.handleDomainToggle)
+		r.Post("/logout", h.handleLogout)
 	})
 
 	// Start background CSRF token cleanup (every 5 minutes)
@@ -665,33 +683,113 @@ func isHTMX(r *http.Request) bool {
 	return r.Header.Get("HX-Request") == "true"
 }
 
-// basicAuth returns a middleware that enforces HTTP Basic Authentication.
-func basicAuth(expectedUser, expectedPassword string) func(http.Handler) http.Handler {
-	expectedUserHash := sha256.Sum256([]byte(expectedUser))
-	expectedPassHash := sha256.Sum256([]byte(expectedPassword))
+// sessionAuth middleware checks for a valid authenticated session cookie.
+func (h *Handler) sessionAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("inkwell_session")
+		if err != nil {
+			h.redirectToLogin(w, r)
+			return
+		}
 
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			user, pass, ok := r.BasicAuth()
-			if !ok {
-				w.Header().Set("WWW-Authenticate", `Basic realm="Inkwell Dashboard"`)
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
+		var session map[string]interface{}
+		if err := h.secureCookie.Decode("inkwell_session", cookie.Value, &session); err != nil {
+			h.redirectToLogin(w, r)
+			return
+		}
 
-			userHash := sha256.Sum256([]byte(user))
-			passHash := sha256.Sum256([]byte(pass))
+		if authenticated, ok := session["authenticated"].(bool); !ok || !authenticated {
+			h.redirectToLogin(w, r)
+			return
+		}
 
-			userMatch := subtle.ConstantTimeCompare(userHash[:], expectedUserHash[:]) == 1
-			passMatch := subtle.ConstantTimeCompare(passHash[:], expectedPassHash[:]) == 1
+		next.ServeHTTP(w, r)
+	})
+}
 
-			if !userMatch || !passMatch {
-				w.Header().Set("WWW-Authenticate", `Basic realm="Inkwell Dashboard"`)
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
-
-			next.ServeHTTP(w, r)
-		})
+func (h *Handler) redirectToLogin(w http.ResponseWriter, r *http.Request) {
+	if isHTMX(r) {
+		w.Header().Set("HX-Redirect", "/login")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+func (h *Handler) handleLoginPage(w http.ResponseWriter, r *http.Request) {
+	// If already authenticated, redirect to dashboard
+	cookie, err := r.Cookie("inkwell_session")
+	if err == nil {
+		var session map[string]interface{}
+		if err := h.secureCookie.Decode("inkwell_session", cookie.Value, &session); err == nil {
+			if authenticated, ok := session["authenticated"].(bool); ok && authenticated {
+				http.Redirect(w, r, "/", http.StatusSeeOther)
+				return
+			}
+		}
+	}
+
+	data := LoginData{
+		Username:  r.URL.Query().Get("username"),
+		Error:     r.URL.Query().Get("error"),
+		CSRFToken: h.generateCSRFToken(),
+	}
+	h.render(w, "loginPageLayout", data)
+}
+
+func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Redirect(w, r, "/login?error=Invalid form data", http.StatusSeeOther)
+		return
+	}
+
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	userHash := sha256.Sum256([]byte(username))
+	passHash := sha256.Sum256([]byte(password))
+
+	userMatch := subtle.ConstantTimeCompare(userHash[:], h.userHash[:]) == 1
+	passMatch := subtle.ConstantTimeCompare(passHash[:], h.passHash[:]) == 1
+
+	if !userMatch || !passMatch {
+		http.Redirect(w, r, "/login?error=Invalid username or password", http.StatusSeeOther)
+		return
+	}
+
+	// Create session
+	session := map[string]interface{}{
+		"authenticated": true,
+		"created":       time.Now().Unix(),
+	}
+
+	encoded, err := h.secureCookie.Encode("inkwell_session", session)
+	if err != nil {
+		log.Printf("Error encoding session: %v", err)
+		http.Redirect(w, r, "/login?error=Internal error", http.StatusSeeOther)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "inkwell_session",
+		Value:    encoded,
+		Path:     "/",
+		MaxAge:   7 * 24 * 60 * 60, // 7 days
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (h *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "inkwell_session",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

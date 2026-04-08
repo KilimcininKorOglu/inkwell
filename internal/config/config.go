@@ -25,9 +25,6 @@ type Config struct {
 
 	// Encryption
 	EncryptionKey string // 32-byte hex-encoded key for AES-256-GCM
-
-	// Auth
-	AuthDisabled bool // set AUTH_DISABLED=true to explicitly skip authentication
 }
 
 // Load reads environment variables and returns a Config with defaults.
@@ -42,7 +39,6 @@ func Load() *Config {
 		AdminPassword: getEnv("ADMIN_PASSWORD", ""),
 		FetchInterval: getEnvInt("FETCH_INTERVAL", 300),
 		EncryptionKey: getEnv("ENCRYPTION_KEY", ""),
-		AuthDisabled:  getEnvBool("AUTH_DISABLED", "false"),
 	}
 }
 
